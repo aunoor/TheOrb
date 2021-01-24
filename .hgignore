@@ -1,0 +1,10 @@
+syntax: glob
+.git
+.idea
+.vs
+cmake-build-*
+build
+
+
+
+

@@ -5,6 +5,7 @@
 
 class EDDNClient;
 class MsgParser;
+class DBManager;
 
 class ServerCore {
 public:
@@ -23,6 +24,7 @@ private:
 
     EDDNClient *m_eddnClient;
     MsgParser *m_msgParser;
+    DBManager *m_dbManager;
 };
 
 
