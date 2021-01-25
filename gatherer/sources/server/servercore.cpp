@@ -5,19 +5,27 @@
 #include "dbmanager/memprovider.h"
 #include "edsmfetcher/psysfetcher.h"
 
+//--------------------------------------------------------------------------------------------------------------------//
+
 ServerCore::ServerCore() {
     m_canExit = false;
     m_eddnClient = nullptr;
     m_msgParser = nullptr;
 }
 
+//--------------------------------------------------------------------------------------------------------------------//
+
 ServerCore::~ServerCore() {
     delete m_eddnClient;
 }
 
+//--------------------------------------------------------------------------------------------------------------------//
+
 bool ServerCore::CanExit() {
     return m_canExit;
 }
+
+//--------------------------------------------------------------------------------------------------------------------//
 
 bool ServerCore::Init() {
     m_dbManager = new DBManager(new MemProvider());
@@ -28,10 +36,15 @@ bool ServerCore::Init() {
     return true;
 }
 
+//--------------------------------------------------------------------------------------------------------------------//
+
 void ServerCore::Start() {
     bool res = m_dbManager->IsSystemsLoaded();
     if (!res) {
         PSysFetcher pSysFetcher;
+        pSysFetcher.DownloadingProgress = [](int32_t current, int32_t length) {
+            printf("Downloaded %u from %u (%u%%)\n", current, length, (unsigned long)(current*100L)/length);
+        };
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
             m_canExit = true;
@@ -47,3 +60,5 @@ void ServerCore::Start() {
 //    m_msgParser->Start();
 //    m_eddnClient->Start();
 }
+
+//--------------------------------------------------------------------------------------------------------------------//
