@@ -32,7 +32,7 @@ void MsgParser::Start() {
 //--------------------------------------------------------------------------------------------------------------------//
 
 void MsgParser::AddMessageToQueue(std::string message) {
-    m_msgQueue.AddEvent(message);
+    m_msgQueue.AddItem(message);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -55,7 +55,6 @@ void MsgParser::parseMessage(const std::string &message) {
         CommodityParser::Parse(document);
 
     }
-
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -66,7 +65,7 @@ void MsgParser::threadFunction() {
     do {
         //checking for exit flag
         if (m_threadBreak) break;
-        msg = m_msgQueue.WaitEvent();
+        msg = m_msgQueue.GetItem();
         parseMessage(msg);
     } while (true);
 }

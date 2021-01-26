@@ -1,7 +1,7 @@
 #ifndef MSGPARSER_H
 #define MSGPARSER_H
 
-#include "msgqueue.h"
+#include "concurrentqueue.h"
 
 #include <atomic>
 #include <mutex>
@@ -22,7 +22,7 @@ private:
     std::atomic<bool> m_threadBreak{};
     std::thread *m_thread;
 
-    MsgQueue m_msgQueue;
+    ConcurrentQueue<std::string> m_msgQueue;
 
     void threadFunction();
 
