@@ -68,7 +68,8 @@ bool PSysFetcher::FetchPopulatedSystems() {
 
     CURLcode res;
     do {
-        curl_easy_setopt(curl, CURLOPT_URL, "https://www.edsm.net/dump/systemsPopulated.json.gz");
+        //curl_easy_setopt(curl, CURLOPT_URL, "https://www.edsm.net/dump/systemsPopulated.json.gz");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/systemsPopulated.json.gz");
 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_func);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);

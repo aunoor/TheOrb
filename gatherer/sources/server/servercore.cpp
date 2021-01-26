@@ -4,6 +4,7 @@
 #include "dbmanager/dbmanager.h"
 #include "dbmanager/memprovider.h"
 #include "edsmfetcher/psysfetcher.h"
+#include "edsmfetcher/psysparser.h"
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -43,7 +44,8 @@ void ServerCore::Start() {
     if (!res) {
         PSysFetcher pSysFetcher;
         pSysFetcher.DownloadingProgress = [](int32_t current, int32_t length) {
-            printf("Downloaded %u from %u (%u%%)\n", current, length, (unsigned long)(current*100L)/length);
+            uint32_t progress = ((uint64_t)current*100L)/length;
+            printf("Downloaded %u from %u (%u%%)\n", current, length, progress);
         };
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
@@ -52,6 +54,13 @@ void ServerCore::Start() {
         }
         std::string json;
         pSysFetcher.GetJSON(json);
+
+        PSysParser pSysParser;
+        pSysParser.SystemReceived = [](StarSystem &system) {
+            printf("New system: %s\n",system.Name.c_str());
+        };
+        pSysParser.ParseJson(json);
+
     }
     m_canExit = true;
 

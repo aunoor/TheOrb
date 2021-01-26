@@ -41,12 +41,12 @@ void MsgParser::parseMessage(const std::string &message) {
     rapidjson::Document document;
     document.Parse(message.c_str());
 
-    if (!document.HasMember(schemaRefName.c_str())) {
+    if (!document.HasMember(schemaRefName)) {
         //TODO:log
         return;
     }
 
-    std::string schemaRef = document[schemaRefName.c_str()].GetString();
+    std::string schemaRef = document[schemaRefName].GetString();
 
     if (schemaRef == "https://eddn.edcd.io/schemas/journal/1") {
         ;

@@ -2,6 +2,7 @@
 #define SPACEOBJECTS_H
 
 #include <string>
+#include <list>
 
 struct SStarCoords{
     float x;
@@ -9,21 +10,23 @@ struct SStarCoords{
     float z;
 };
 
-class StarSystem {
-public:
-    StarSystem();
-    StarSystem(uint32_t id, uint64_t id64, std::string name, SStarCoords coords);
+struct Station {
+    std::string Name;
+    uint32_t Id = 0;
+    uint64_t MarketId = 0;
+    ///Type of station: Coriolis, Outpost, asteroid base...
+    std::string Type;
+    float Dist2Arrival = 0;
+    bool HaveMarket = false;
+};
 
-    uint32_t GetId();
-    uint64_t GetId64();
-    std::string GetName();
-    SStarCoords GetCoords();
 
-private:
-    uint32_t m_id;
-    uint64_t m_id64;
-    std::string m_name;
-    SStarCoords m_coords{};
+struct StarSystem {
+    uint32_t Id = 0;
+    uint64_t Id64 = 0;
+    std::string Name;
+    SStarCoords Coords{};
+    std::list<Station> Stations;
 };
 
 #endif //SPACEOBJECTS_H

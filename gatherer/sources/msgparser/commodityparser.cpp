@@ -2,7 +2,7 @@
 #include "common/schemadefs.h"
 
 void CommodityParser::Parse(rapidjson::Document &document) {
-    if (!document.HasMember(headerName.c_str())) {
+    if (!document.HasMember(headerName)) {
         //TODO: log
         return;
     }
