@@ -49,23 +49,21 @@ void ServerCore::Start() {
                 printf("Downloaded %u from %u (%u%%)\n", current, length, progress);
             }
         };
+        uint64_t sysCnt = 0;
+        pSysFetcher.SystemReceived = [&sysCnt](StarSystem &system) {
+            //printf("New system: %s\n",system.Name.c_str());
+            sysCnt++;
+        };
+
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
             m_canExit = true;
             return;
         }
 
-        std::string json;
-        pSysFetcher.GetJSON(json);
-/*
-        PSysParser pSysParser;
-        pSysParser.SystemReceived = [](StarSystem &system) {
-            printf("New system: %s\n",system.Name.c_str());
-        };
-        pSysParser.ParseJson(json);
-*/
+        printf("Downloading finished. %d systems added\n", sysCnt);
     }
-    m_canExit = true;
+    //m_canExit = true;
 
 
 

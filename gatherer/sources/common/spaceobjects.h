@@ -16,7 +16,7 @@ struct Station {
     uint64_t MarketId = 0;
     ///Type of station: Coriolis, Outpost, asteroid base...
     std::string Type;
-    float Dist2Arrival = 0;
+    float Dist2Arrival = -1;
     bool HaveMarket = false;
 };
 

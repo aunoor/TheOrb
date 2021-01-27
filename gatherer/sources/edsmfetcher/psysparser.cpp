@@ -1,10 +1,11 @@
 #include "psysparser.h"
+//#include "psysjhandler.h"
 #include "common/json_helpers.h"
 #include "common/schemadefs.h"
 
 #include "rapidjson/reader.h"
-#include <iostream>
-#include <sstream>
+#include <cctype>
+
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -12,172 +13,88 @@ bool parseStations(rapidjson::Value &object, StarSystem &starSystem);
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-class CharStream {
-public:
-    typedef char Ch; //Необходимый элемент для работы Reader
-
-    CharStream() = default;
-
-    char Peek() const {
-        return m_dataQueue.PeekItem();
-    }
-
-    char Take() {
-        return m_dataQueue.GetItem();
-    }
-
-    size_t Tell() const {
-        return m_dataQueue.Size();
-    }
-
-    void Put(char data) {
-        m_dataQueue.AddItem(data);
-    }
-
-    char* PutBegin() {
-        //assert(false);
-        m_dataQueue.StartAdding();
-        return nullptr;
-    }
-    size_t PutEnd(char*) {
-        //assert(false);
-        m_dataQueue.StopAdding();
-        return 0;
-    }
-    void Flush() { assert(false); }
-
-    CharStream(const CharStream&) = delete;
-    CharStream& operator=(const CharStream&) = delete;
-
-private:
-    mutable ConcurrentQueue<char> m_dataQueue;
-};
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-struct MyHandler : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, MyHandler> {
-    bool Null() {
-        //std::cout << "Null()" << std::endl;
-        return true;
-    }
-    bool Bool(bool b) {
-        //std::cout << "Bool(" << std::boolalpha << b << ")" << std::endl;
-        return true;
-    }
-    bool Int(int i) {
-        //std::cout << "Int(" << i << ")" << std::endl;
-        return true;
-    }
-    bool Uint(unsigned u) {
-        //std::cout << "Uint(" << u << ")" << std::endl;
-        return true;
-    }
-    bool Int64(int64_t i) {
-        //std::cout << "Int64(" << i << ")" << std::endl;
-        return true;
-    }
-    bool Uint64(uint64_t u) {
-        //std::cout << "Uint64(" << u << ")" << std::endl;
-        return true;
-    }
-    bool Double(double d) {
-        //std::cout << "Double(" << d << ")" << std::endl;
-        return true;
-    }
-    bool String(const char* str, rapidjson::SizeType length, bool copy) {
-        //std::cout << "String(" << str << ", " << length << ", " << std::boolalpha << copy << ")" << std::endl;
-        return true;
-    }
-    bool StartObject() {
-        //std::cout << "StartObject()" << std::endl;
-        return true;
-    }
-    bool Key(const char* str, rapidjson::SizeType length, bool copy) {
-        //std::cout << "Key(" << str << ", " << length << ", " << std::boolalpha << copy << ")" << std::endl;
-        return true;
-    }
-    bool EndObject(rapidjson::SizeType memberCount) {
-        //std::cout << "EndObject(" << memberCount << ")" << std::endl;
-        return true;
-    }
-    bool StartArray() {
-        //std::cout << "StartArray()" << std::endl;
-        return true;
-    }
-    bool EndArray(rapidjson::SizeType elementCount) {
-        //std::cout << "EndArray(" << elementCount << ")" << std::endl;
-        return true;
-    }
-};
-
-//--------------------------------------------------------------------------------------------------------------------//
-
 PSysParser::PSysParser() {
-    m_charStream = new CharStream();
-    m_thread = nullptr;
+    m_bracesCount = 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-PSysParser::~PSysParser() {
-    if (m_thread) {
-        m_thread->join();
-        delete m_thread;
-    }
-    delete m_charStream;
-}
+bool PSysParser::AddData(const char *data, size_t length) {
 
-//--------------------------------------------------------------------------------------------------------------------//
+    if (m_state == epsEndOfArray) return true;
 
-void PSysParser::AddData(char *data, size_t length) {
-    m_charStream->PutBegin();
     for (int i = 0; i < length; i++) {
-        m_charStream->Put(data[i]);
+        char c = data[i];
+
+        if (m_state == epsWaitStartArray || m_state == epsWaitObjectStart) {
+            //пропускаем пробельные символы в ожидании начала объекта/массива
+            if (isspace(c)) continue;
+            if (c==',') continue;
+        }
+
+        switch (m_state) {
+            case epsWaitStartArray:
+                if (c == '[') {
+                    m_state = epsWaitObjectStart;
+                } else {
+                    printf("Can't find array opening brace\n");
+                    return false;
+                }
+                break;
+            case epsWaitObjectStart:
+                if (c == ']') {
+                    m_state = epsEndOfArray;
+                    break;
+                }
+                if (c == '{') {
+                    m_state = epsWaitObjectEnd;
+                    m_objectStr = c;
+                    m_bracesCount = 1;
+                } else {
+                    printf("Can't find object opening brace\n");
+                    return false;
+                }
+                break;
+            case epsWaitObjectEnd:
+                m_objectStr += c;
+                if (c=='{') {
+                    m_bracesCount++;
+                }
+                if (c=='}') {
+                    m_bracesCount--;
+                }
+                if (m_bracesCount == 0) {
+                    m_state = epsWaitObjectStart;
+                    //printf("%s\n",m_objectStr.c_str());
+                    if (!parseSystemObject(m_objectStr)) {
+                        return false;
+                    }
+                }
+                break;
+            default:
+                return false;
+        }
     }
-    m_charStream->PutEnd(nullptr);
+
+    return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+bool PSysParser::parseSystemObject(std::string &object) {
+    rapidjson::Document document;
+    document.Parse(object.c_str());
+    if (document.IsNull()) {
+        printf("Error while parse sysobject\n");
+    }
+    bool res = parseSystemObject(document);
+    return res;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
 void PSysParser::StartParse() {
-    m_thread = new std::thread(&PSysParser::threadFunction, this);
-}
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-void PSysParser::threadFunction() {
-    MyHandler handler;
-    rapidjson::Reader reader;
-    std::cout << "Start Parse" << std::endl;
-    reader.Parse<rapidjson::kParseIterativeFlag>(*m_charStream, handler);
-    std::cout << "End Parse" << std::endl;
-}
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-
-bool PSysParser::ParseJson(const std::string &json) {
-    rapidjson::Document document;
-    document.Parse(json.c_str());
-
-    rapidjson::StringStream stream(json.c_str());
-    MyHandler handler;
-    rapidjson::Reader reader;
-    reader.Parse<rapidjson::kParseIterativeFlag>(stream, handler);
-
-    return false;
-
-    auto array = document.GetArray();
-    if (array.Empty()) {
-        return false;
-    }
-
-    for (auto& v : array) {
-        rapidjson::Value a = v.GetObject();
-        parseSystemObject(a);
-    }
-
-    return false;
+    m_state = epsWaitStartArray;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -221,9 +138,12 @@ bool PSysParser::parseSystemObject(rapidjson::Value &object) {
     starSystem.Coords = coords;
 
     if (object.HasMember(stationsName)) {
-        res = parseStations(object[stationsName], starSystem);
-        if (!res) {
-            return false;
+        auto stations = object[stationsName].GetArray();
+        for (auto& s : stations) {
+            res = parseStations(s, starSystem);
+            if (!res) {
+                return false;
+            }
         }
     }
 
@@ -246,37 +166,49 @@ bool parseStations(rapidjson::Value &object, StarSystem &starSystem) {
  */
 
     Station station;
-
-    if (!object.HasMember(idName)) {
+    //id
+    if (!object.HasMember(idName) || object[idName].IsNull()) {
         return false;
     }
     station.Id = object[idName].GetInt();
 
-    if (!object.HasMember(marketIdName)) {
-        return false;
+    //marketId
+    if (object.HasMember(marketIdName)) {
+        if (!object[marketIdName].IsNull()) {
+            station.MarketId = object[marketIdName].GetInt64();
+        }
     }
-    station.MarketId = object[marketIdName].GetInt();
 
+    //name
     if (!object.HasMember(nameName)) {
         return false;
     }
-    station.Name = object[nameName].GetString();
+    if (!object[nameName].IsNull()) {
+        station.Name = object[nameName].GetString();
+    }
 
+    //type
     if (!object.HasMember(typeName)) {
         return false;
     }
-    station.Type = object[typeName].GetString();
+    if (!object[typeName].IsNull()) {
+        station.Type = object[typeName].GetString();
+    }
 
+    //dist2Arrival
     if (!object.HasMember(dist2ArrivalName)) {
         return false;
     }
-    station.Dist2Arrival = object[dist2ArrivalName].GetFloat();
-
-    if (!object.HasMember(haveMarketName)) {
-        return false;
+    if (!object[dist2ArrivalName].IsNull()) {
+        station.Dist2Arrival = object[dist2ArrivalName].GetFloat();
     }
-    station.Dist2Arrival = object[haveMarketName].GetFloat();
 
+    //haveMarket
+    if (object.HasMember(haveMarketName)) {
+        if (!object[haveMarketName].IsNull()) {
+            station.HaveMarket = object[haveMarketName].GetBool();
+        }
+    }
 
     starSystem.Stations.push_back(station);
     return true;

@@ -8,27 +8,34 @@
 #include <string>
 #include <thread>
 
-class CharStream;
+enum EParseState {
+    epsUnknown = 0,
+    epsWaitStartArray = 1, //ожидание начального массива
+    epsWaitObjectStart, //ожидание начала объекта системы
+    epsWaitObjectEnd, //ожидание окончания описания объекта системы
+    epsEndOfArray //найдена закрывающая скобка массива объектов систем
+};
 
 class PSysParser {
 public:
     PSysParser();
-    ~PSysParser();
-    void AddData(char *data, size_t length);
-    bool ParseJson(const std::string &json);
+    ///Add data to object extractor
+    bool AddData(const char *data, size_t length);
+    ///Reset extractor state
     void StartParse();
 
     std::function<void(StarSystem &system)> SystemReceived;
+
 private:
+    ///Current state of object extractor
+    EParseState m_state = epsUnknown;
+    ///Accumulated string for object description
+    std::string m_objectStr;
+    ///Count of braces
+    uint32_t m_bracesCount;
 
-    std::thread *m_thread;
-
-    CharStream *m_charStream;
-
+    bool parseSystemObject(std::string &object);
     bool parseSystemObject(rapidjson::Value &object);
-
-
-    void threadFunction();
 };
 
 
