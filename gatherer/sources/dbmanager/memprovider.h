@@ -16,7 +16,7 @@ public:
     bool UpdateSystem(StarSystem &system) override;
 
 private:
-    std::forward_list<StarSystem> m_systems;
+    std::list<StarSystem> m_systems;
 };
 
 

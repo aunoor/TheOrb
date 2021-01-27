@@ -19,11 +19,12 @@ bool MemProvider::UpdateSystem(StarSystem &system) {
     while (it != m_systems.end()) {
         if (it->Id64 == system.Id64) {
             *it = system;
+            return true;
         }
-        return true;
+        it++;
     }
 
     //m_systems.insert_after(m_systems., system);
-    m_systems.push_front(system);
+    m_systems.push_back(system);
     return true;
 }
