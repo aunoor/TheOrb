@@ -50,8 +50,9 @@ void ServerCore::Start() {
             }
         };
         uint64_t sysCnt = 0;
-        pSysFetcher.SystemReceived = [&sysCnt](StarSystem &system) {
+        pSysFetcher.SystemReceived = [this, &sysCnt](StarSystem &system) {
             //printf("New system: %s\n",system.Name.c_str());
+            m_dbManager->UpdateSystem(system);
             sysCnt++;
         };
 

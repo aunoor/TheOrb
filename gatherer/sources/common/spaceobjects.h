@@ -27,6 +27,8 @@ struct StarSystem {
     std::string Name;
     SStarCoords Coords{};
     std::list<Station> Stations;
+
+    bool IsValid = false;
 };
 
 #endif //SPACEOBJECTS_H
