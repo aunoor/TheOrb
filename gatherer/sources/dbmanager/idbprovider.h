@@ -4,6 +4,13 @@
 #include "common/spaceobjects.h"
 #include <string>
 
+struct DBConnParams {
+    std::string host;
+    int32_t port;
+    std::string user;
+    std::string password;
+};
+
 class IDBProvider {
 public:
     virtual bool Init() = 0;
