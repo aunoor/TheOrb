@@ -1,14 +1,21 @@
 #include "server/servercore.h"
+#include "server/srvconfig.h"
 
 #include <chrono>
 #include <thread>
 
 int main(int argc, char *argv[])
 {
+
+    SrvConfig config;
+    if (!config.ParseConfig(argc, argv)) {
+        return -1;
+    }
+
     ServerCore serverCore;
 
     if (!serverCore.Init()) {
-        return -1;
+        return -2;
     }
 
     serverCore.Start();
