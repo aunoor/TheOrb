@@ -1,7 +1,7 @@
 #ifndef PGCONNECTION_H
 #define PGCONNECTION_H
 
-#include "../idbprovider.h"
+#include "common/commondefs.h"
 
 class PgConnection {
 public:

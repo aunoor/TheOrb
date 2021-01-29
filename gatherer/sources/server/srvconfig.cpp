@@ -58,9 +58,73 @@ bool SrvConfig::parseConfigFile() {
         return false;
     }
 
+    bool res = true;
+    if (document.HasMember("db")) {
+        res = parseDBObject(document["db"]);
+    }
 
+
+    return res;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+const char hostParam[] = "host";
+const char portParam[] = "port";
+const char userParam[] = "user";
+const char passwordParam[] = "password";
+const char dbNameParam[] = "dbname";
+
+bool SrvConfig::parseDBObject(rapidjson::Value &object) {
+    DBConnParams connParams{};
+    if (object.HasMember(hostParam)) {
+        if (!object[hostParam].IsString()) {
+            printf("Invalid value for db.host.");
+            return false;
+        }
+        connParams.host = object[hostParam].GetString();
+    }
+    if (object.HasMember(portParam)) {
+        if (!object[portParam].IsUint()) {
+            printf("Invalid value for db.port.");
+            return false;
+        }
+        connParams.port = object[portParam].GetUint();
+    }
+    if (object.HasMember(userParam)) {
+        if (!object[userParam].IsString()) {
+            printf("Invalid value for db.user.");
+            return false;
+        }
+        connParams.user = object[userParam].GetString();
+    }
+    if (object.HasMember(passwordParam)) {
+        if (!object[passwordParam].IsString()) {
+            printf("Invalid value for db.password.");
+            return false;
+        }
+        connParams.password = object[passwordParam].GetString();
+    }
+    if (object.HasMember(dbNameParam)) {
+        if (!object[dbNameParam].IsString()) {
+            printf("Invalid value for db.dbname.");
+            return false;
+        }
+        connParams.dbName = object[dbNameParam].GetString();
+    } else {
+        printf("DB name not defined.");
+        return false;
+    }
+
+    m_dbParams = connParams;
 
     return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+DBConnParams SrvConfig::GetDBParams() {
+    return m_dbParams;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//

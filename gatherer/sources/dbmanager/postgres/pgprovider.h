@@ -1,13 +1,14 @@
 #ifndef PGPROVIDER_H
 #define PGPROVIDER_H
 
-#include "../idbprovider.h"
+#include "common/commondefs.h"
+#include "dbmanager/idbprovider.h"
 
 class PgConnPool;
 
 class PgProvider : public IDBProvider {
 public:
-    PgProvider(DBConnParams &params);
+    explicit PgProvider(DBConnParams &params);
     ~PgProvider();
 
     bool Init() override;
