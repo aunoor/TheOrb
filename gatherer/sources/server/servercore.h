@@ -7,9 +7,11 @@ class EDDNClient;
 class MsgParser;
 class DBManager;
 
+class SrvConfig;
+
 class ServerCore {
 public:
-    ServerCore();
+    ServerCore(SrvConfig *config);
     ~ServerCore();
     ///Function return if program can break main loop
     bool CanExit();
@@ -25,6 +27,7 @@ private:
     EDDNClient *m_eddnClient;
     MsgParser *m_msgParser;
     DBManager *m_dbManager;
+    SrvConfig *m_config;
 };
 
 

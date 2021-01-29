@@ -1,17 +1,20 @@
 #include "servercore.h"
 #include "eddnclient.h"
+#include "srvconfig.h"
 #include "msgparser/msgparser.h"
 #include "dbmanager/dbmanager.h"
 #include "dbmanager/memprovider.h"
+#include "dbmanager/postgres/pgprovider.h"
 #include "edsmfetcher/psysfetcher.h"
 #include "edsmfetcher/psysparser.h"
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-ServerCore::ServerCore() {
+ServerCore::ServerCore(SrvConfig *config) {
     m_canExit = false;
     m_eddnClient = nullptr;
     m_msgParser = nullptr;
+    m_config = config;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -29,7 +32,9 @@ bool ServerCore::CanExit() {
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool ServerCore::Init() {
-    m_dbManager = new DBManager(new MemProvider());
+    //m_dbManager = new DBManager(new MemProvider());
+    m_dbManager = new DBManager(new PgProvider(m_config->GetDBParams()));
+    m_dbManager->Init();
 
     m_eddnClient = new EDDNClient("tcp://eddn.edcd.io:9500");
     m_msgParser = new MsgParser();
@@ -44,8 +49,8 @@ void ServerCore::Start() {
     if (!res) {
         PSysFetcher pSysFetcher;
         pSysFetcher.DownloadingProgress = [](int32_t current, int32_t length) {
-            if (length>0) {
-                uint32_t progress = ((uint64_t) current * 100L) / length;
+            if (length > 0) {
+                uint32_t progress = ((uint64_t)current * 100L) / length;
                 printf("Downloaded %u from %u (%u%%)\n", current, length, progress);
             }
         };

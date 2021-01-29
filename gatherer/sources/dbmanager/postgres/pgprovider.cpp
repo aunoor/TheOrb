@@ -3,7 +3,7 @@
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-PgProvider::PgProvider(DBConnParams &params) {
+PgProvider::PgProvider(DBConnParams params) {
     m_connPool = new PgConnPool(params);
 }
 

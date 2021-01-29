@@ -116,6 +116,13 @@ bool SrvConfig::parseDBObject(rapidjson::Value &object) {
         return false;
     }
 
+    if (connParams.user.empty()) {
+        if (!connParams.password.empty()) {
+            printf("Password defined w/o user.");
+            return false;
+        }
+    }
+
     m_dbParams = connParams;
 
     return true;

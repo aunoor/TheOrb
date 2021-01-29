@@ -8,7 +8,7 @@ class PgConnPool;
 
 class PgProvider : public IDBProvider {
 public:
-    explicit PgProvider(DBConnParams &params);
+    explicit PgProvider(DBConnParams params);
     ~PgProvider();
 
     bool Init() override;

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    ServerCore serverCore;
+    ServerCore serverCore(&config);
 
     if (!serverCore.Init()) {
         return -2;
