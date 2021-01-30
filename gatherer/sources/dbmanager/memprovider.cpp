@@ -4,13 +4,15 @@ bool MemProvider::Init() {
     return true;
 }
 
-StarSystem MemProvider::GetSystemByName(const std::string &name) {
+bool MemProvider::GetSystemByName(const std::string &name, StarSystem &starSystem) {
     for (const auto& system : m_systems) {
         if (system.Name == name) {
-            return system;
+            starSystem = system;
+            return true;
         }
     }
-    return StarSystem();
+    starSystem = StarSystem();
+    return true;
 }
 
 bool MemProvider::UpdateSystem(StarSystem &system) {

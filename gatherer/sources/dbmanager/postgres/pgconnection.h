@@ -7,7 +7,11 @@
 class PgConnection {
 public:
     explicit PgConnection(DBConnParams &params);
+    ~PgConnection();
     bool Open();
+    PGconn * GetPGconn();
+    bool CheckConnection();
+
 private:
     std::string m_connInfo;
     PGconn *m_pgConn;

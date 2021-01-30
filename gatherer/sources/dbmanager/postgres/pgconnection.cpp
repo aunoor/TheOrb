@@ -27,9 +27,44 @@ PgConnection::PgConnection(DBConnParams &params) {
     m_connInfo += "/"+params.dbName;
 }
 
+PgConnection::~PgConnection() {
+    if (m_pgConn) {
+        PQfinish(m_pgConn);
+    }
+}
+
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool PgConnection::Open() {
     m_pgConn = PQconnectdb(m_connInfo.c_str());
-    return (m_pgConn != nullptr);
+    if(PQstatus(m_pgConn)!= CONNECTION_OK){
+        printf("Connection to database failed:%s\n", PQerrorMessage(m_pgConn));
+    }
+
+    return (PQstatus(m_pgConn) == CONNECTION_OK);
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+PGconn *PgConnection::GetPGconn() {
+    return m_pgConn;
+}
+
+bool PgConnection::CheckConnection() {
+    if (m_pgConn == nullptr) return false;
+
+    bool wasReset = false;
+    ConnStatusType status;
+    do {
+        status = PQstatus(m_pgConn);
+        if (status == CONNECTION_BAD) {
+            if (wasReset) break;
+            PQreset(m_pgConn);
+            wasReset = true;
+            continue;
+        }
+        break;
+    } while(true);
+
+    return (status == CONNECTION_OK);
 }

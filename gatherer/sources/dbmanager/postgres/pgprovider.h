@@ -13,7 +13,7 @@ public:
 
     bool Init() override;
 
-    StarSystem GetSystemByName(const std::string &name) override;
+    bool GetSystemByName(const std::string &name, StarSystem &starSystem) override;
 
     bool UpdateSystem(StarSystem &system) override;
 

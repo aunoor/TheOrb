@@ -26,33 +26,33 @@ CREATE TABLE commodities
 
 CREATE TABLE commodity
 (
-	"marketId" bigint NOT NULL,
-	"commodityId" integer NOT NULL,
-	"meanPrice" integer NULL,
-	"buyPrice" integer NULL,
+	market_id bigint NOT NULL,
+	commodity_id integer NOT NULL,
+	mean_price integer NULL,
+	buy_price integer NULL,
 	stock integer NULL,
-	"stockBracket" integer NULL,
-	"sellPrice" integer NULL,
+	stock_bracket integer NULL,
+	sell_price integer NULL,
 	demand integer NULL,
-	"demandBracket" integer NULL
+	demand_bracket integer NULL
 )
 ;
 
 CREATE TABLE markets
 (
-	"marketId" bigint NOT NULL,
+	market_id bigint NOT NULL,
 	updated timestamp without time zone NOT NULL
 )
 ;
 
 CREATE TABLE stations
 (
-	"systemId64" bigint NOT NULL,
-	"stationName" varchar(500) NOT NULL,
-	"marketId" bigint NULL,
-	"statationType" integer NOT NULL,
-	"distanceToArrival" integer NULL,
-	"haveMarket" boolean NULL
+	system_id64 bigint NOT NULL,
+	station_name varchar(500) NOT NULL,
+	market_id bigint NULL,
+	station_type integer NOT NULL,
+	distance2arrival integer NULL,
+	have_market boolean NULL
 )
 ;
 
@@ -60,11 +60,11 @@ CREATE TABLE systems
 (
 	id integer NOT NULL,
 	id64 bigint NOT NULL,
-	"systemName" varchar(500) NOT NULL,
+	system_name varchar(500) NOT NULL,
 	x double precision NULL,
 	y double precision NULL,
 	z double precision NULL,
-	"requirePermit" boolean NULL
+	require_permit boolean NULL
 )
 ;
 
@@ -75,57 +75,55 @@ ALTER TABLE commodities ADD CONSTRAINT "PK_commodities_id"
 ;
 
 ALTER TABLE commodity ADD CONSTRAINT "PK_commodity_id"
-	PRIMARY KEY ("marketId","commodityId")
+	PRIMARY KEY ("market_id","commodity_id")
 ;
 
-CREATE INDEX "IXFK_commodity_commodities" ON commodity ("commodityId" ASC)
+CREATE INDEX "IXFK_commodity_commodities" ON commodity ("commodity_id" ASC)
 ;
 
-CREATE INDEX "IXFK_commodity_markets" ON commodity ("marketId" ASC)
+CREATE INDEX "IXFK_commodity_markets" ON commodity ("market_id" ASC)
 ;
 
 ALTER TABLE markets ADD CONSTRAINT "PK_markets"
-	PRIMARY KEY ("marketId")
+	PRIMARY KEY ("market_id")
 ;
 
-CREATE INDEX "IXFK_markets_stations" ON markets ("marketId" ASC)
+CREATE INDEX "IXFK_markets_stations" ON markets ("market_id" ASC)
 ;
 
 ALTER TABLE stations ADD CONSTRAINT "PK_stations_id"
-	PRIMARY KEY ("systemId64")
+	PRIMARY KEY ("system_id64")
 ;
 
-CREATE INDEX "IXFK_stations_systems" ON stations ("systemId64" ASC)
+CREATE INDEX "IXFK_stations_systems" ON stations ("system_id64" ASC)
 ;
 
-CREATE UNIQUE INDEX "I_stations_marketId" ON stations ("marketId" ASC)
+CREATE UNIQUE INDEX "I_stations_marketId" ON stations ("market_id" ASC)
 ;
 
 ALTER TABLE systems ADD CONSTRAINT "PK_systems_id64"
 	PRIMARY KEY (id64)
 ;
 
-CREATE INDEX "I_systemName" ON systems ("systemName" ASC)
+CREATE INDEX "I_system_name" ON systems ("system_name" ASC)
 ;
 
 /* Create Foreign Key Constraints */
 
 ALTER TABLE commodity ADD CONSTRAINT "FK_commodity_commodities"
-	FOREIGN KEY ("commodityId") REFERENCES commodities (id) ON DELETE Cascade
+	FOREIGN KEY ("commodity_id") REFERENCES commodities (id) ON DELETE Cascade
 ;
 
 ALTER TABLE commodity ADD CONSTRAINT "FK_commodity_markets"
-	FOREIGN KEY ("marketId") REFERENCES markets ("marketId") ON DELETE No Action ON UPDATE No Action
+	FOREIGN KEY ("market_id") REFERENCES markets ("market_id") ON DELETE No Action ON UPDATE No Action
 ;
 
 ALTER TABLE markets ADD CONSTRAINT "FK_markets_stations"
-	FOREIGN KEY ("marketId") REFERENCES stations ("marketId") ON DELETE Cascade
+	FOREIGN KEY ("market_id") REFERENCES stations ("market_id") ON DELETE Cascade
 ;
 
 ALTER TABLE stations ADD CONSTRAINT "FK_stations_systems"
-	FOREIGN KEY ("systemId64") REFERENCES systems (id64) ON DELETE Cascade
+	FOREIGN KEY ("system_id64") REFERENCES systems (id64) ON DELETE Cascade
 ;
-
-/* Create Table Comments, Sequences for Autonumber Columns */
 
 

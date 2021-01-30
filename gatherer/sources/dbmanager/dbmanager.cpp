@@ -14,8 +14,9 @@ bool DBManager::Init() {
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool DBManager::IsSystemsLoaded() {
-    auto cubeo = GetSystemByName("Cubeo");
-    return cubeo.IsValid;
+    StarSystem starSystem;
+    bool res = GetSystemByName("Cubeo", starSystem);
+    return (res && starSystem.IsValid);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -26,6 +27,7 @@ bool DBManager::UpdateSystem(StarSystem &system) {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-StarSystem DBManager::GetSystemByName(const std::string &name) {
-    return m_provider->GetSystemByName(name);
+bool DBManager::GetSystemByName(const std::string &name, StarSystem &starSystem) {
+    bool res = m_provider->GetSystemByName(name, starSystem);
+    return res;
 }

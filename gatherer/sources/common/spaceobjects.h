@@ -26,6 +26,7 @@ struct StarSystem {
     uint64_t Id64 = 0;
     std::string Name;
     SStarCoords Coords{};
+    bool RequirePermit = false;
     std::list<Station> Stations;
 
     bool IsValid = false;

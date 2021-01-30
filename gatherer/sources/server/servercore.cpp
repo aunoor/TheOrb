@@ -34,7 +34,10 @@ bool ServerCore::CanExit() {
 bool ServerCore::Init() {
     //m_dbManager = new DBManager(new MemProvider());
     m_dbManager = new DBManager(new PgProvider(m_config->GetDBParams()));
-    m_dbManager->Init();
+    bool res = m_dbManager->Init();
+    if (!res) {
+        return false;
+    }
 
     m_eddnClient = new EDDNClient("tcp://eddn.edcd.io:9500");
     m_msgParser = new MsgParser();

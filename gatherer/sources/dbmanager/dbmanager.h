@@ -15,7 +15,7 @@ public:
 
     bool UpdateSystem(StarSystem &system);
 
-    StarSystem GetSystemByName(const std::string &name);
+    bool GetSystemByName(const std::string &name, StarSystem &starSystem);
 
 private:
     IDBProvider *m_provider;

@@ -7,7 +7,7 @@
 class IDBProvider {
 public:
     virtual bool Init() = 0;
-    virtual StarSystem GetSystemByName(const std::string &name) = 0;
+    virtual bool GetSystemByName(const std::string &name, StarSystem &starSystem) = 0;
     virtual bool UpdateSystem(StarSystem &system) = 0;
 };
 
