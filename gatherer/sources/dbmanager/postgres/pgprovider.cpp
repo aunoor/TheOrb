@@ -33,7 +33,7 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
     }
 
     std::string query =  "select * from systems where (system_name = :name);";
-    PgSelectQuery pgQuery(pgCon);
+    PgQuery pgQuery(pgCon);
     pgQuery.Prepare(query);
     pgQuery.BindValue(":name", name);
     bool res;
@@ -61,7 +61,7 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
     }
 
     std::string query = "insert into systems (id, id64, system_name, x, y, z, require_permit) values (:id, :id64, :name, :x, :y, :z, :permit)";
-    PgSelectQuery pgQuery(pgCon);
+    PgQuery pgQuery(pgCon);
     pgQuery.Prepare(query);
     pgQuery.BindValue(":id", system.Id);
     pgQuery.BindValue(":id64", system.Id64);

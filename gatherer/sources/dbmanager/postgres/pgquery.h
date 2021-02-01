@@ -8,7 +8,7 @@
 #include <vector>
 
 class PgConnection;
-class PgSelectQuery;
+class PgQuery;
 
 class AbstractPgQuery {
 public:
@@ -49,7 +49,7 @@ public:
         bool m_isNull = true;
         bool m_isValid = false;
         PgField() = default;
-        friend PgSelectQuery;
+        friend PgQuery;
         friend PgRecord;
     };
 
@@ -65,22 +65,21 @@ private:
     PgRecord() = default;
     std::vector<PgField> m_values;
     bool m_isValid = false;
-    friend PgSelectQuery;
+    friend PgQuery;
 };
 
-class PgSelectQuery : public AbstractPgQuery {
+class PgQuery : public AbstractPgQuery {
 public:
-    explicit PgSelectQuery(PgConnection *connection);
-    ~PgSelectQuery() override;
+    explicit PgQuery(PgConnection *connection);
     bool Exec() override;
-    int64_t RowCount();
+    int RowCount();
     bool Next();
     PgRecord Record();
 private:
     ///Current row
     int64_t m_currentRow;
     ///Row counts returned by select
-    int64_t m_rowCnt;
+    int m_rowCnt;
 };
 
 

@@ -24,14 +24,10 @@ std::string AbstractPgQuery::ErrorString() {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-PgSelectQuery::PgSelectQuery(PgConnection *connection) : AbstractPgQuery (connection) {
+PgQuery::PgQuery(PgConnection *connection) : AbstractPgQuery (connection) {
     m_currentRow = -1;
     m_rowCnt = 0;
 }
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-PgSelectQuery::~PgSelectQuery() = default;
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -101,7 +97,7 @@ bool AbstractPgQuery::bindValue(const std::string &placeholder, const std::strin
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool PgSelectQuery::Exec() {
+bool PgQuery::Exec() {
     bool res = false;
     m_currentRow = -1;
     m_pgResult = PQexec(m_connection->GetPGconn(), m_queryString.c_str());
@@ -121,13 +117,13 @@ bool PgSelectQuery::Exec() {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-int64_t PgSelectQuery::RowCount() {
+int PgQuery::RowCount() {
     return m_rowCnt;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool PgSelectQuery::Next() {
+bool PgQuery::Next() {
     if (m_rowCnt == 0) return false;
     if (m_currentRow == m_rowCnt) return false;
     m_currentRow++;
@@ -136,7 +132,7 @@ bool PgSelectQuery::Next() {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-PgRecord PgSelectQuery::Record() {
+PgRecord PgQuery::Record() {
     if (m_currentRow < 0 || m_currentRow > m_rowCnt) return PgRecord();
     PgRecord record;
     if (PQnfields(m_pgResult) > 0) {
