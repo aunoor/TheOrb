@@ -1,6 +1,7 @@
 #include "pgprovider.h"
 #include "pgconnpool.h"
 #include "pghelpers.h"
+#include "pgquery.h"
 
 #include <libpq-fe.h>
 
@@ -31,20 +32,22 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
         return false;
     }
 
-    std::string query = "select * from systems where (system_name = '"+name+"');";
-    auto pgResult = PQexec(pgCon->GetPGconn(), query.c_str());
-
-    bool res = checkSelectPgResult(pgResult, nullptr);
-    if (res) {
-        int cnt = PQntuples(pgResult);
-        if (cnt != 0) {
-            tmpStarSystem = pgResult2StarSystem(pgResult, 0);
+    std::string query =  "select * from systems where (system_name = :name);";
+    PgSelectQuery pgQuery(pgCon);
+    pgQuery.Prepare(query);
+    pgQuery.BindValue(":name", name);
+    bool res;
+    do {
+        res = pgQuery.Exec();
+        if (!res) {
+            printf(pgQuery.ErrorString().c_str());
+            break;
         }
-        tmpStarSystem.IsValid = true;
-        starSystem = tmpStarSystem;
-    }
+        if (!pgQuery.Next()) break;
+        PgRecord record = pgQuery.Record();
+        starSystem = pgResult2StarSystem(&record);
+    } while(false);
 
-    PQclear(pgResult);
     m_connPool->ReturnConnection(pgCon);
     return res;
 }
@@ -57,9 +60,18 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
         return false;
     }
 
-    //std::string query = "insert into systems ()"
-
+    std::string query = "insert into systems (id, id64, system_name, x, y, z, require_permit) values (:id, :id64, :name, :x, :y, :z, :permit)";
+    PgSelectQuery pgQuery(pgCon);
+    pgQuery.Prepare(query);
+    pgQuery.BindValue(":id", system.Id);
+    pgQuery.BindValue(":id64", system.Id64);
+    pgQuery.BindValue(":name", system.Name);
+    pgQuery.BindValue(":x", system.Coords.x);
+    pgQuery.BindValue(":y", system.Coords.y);
+    pgQuery.BindValue(":z", system.Coords.z);
+    pgQuery.BindValue(":permit", system.RequirePermit);
+    bool res = pgQuery.Exec();
 
     m_connPool->ReturnConnection(pgCon);
-    return false;
+    return res;
 }

@@ -16,7 +16,12 @@ public:
     virtual ~AbstractPgQuery();
     void Prepare(const std::string& query);
     bool BindValue(const std::string& placeholder, const std::string& value);
-    bool BindValue(const std::string& placeholder, int value);
+    bool BindValue(const std::string& placeholder, int32_t value);
+    bool BindValue(const std::string& placeholder, int64_t value);
+    bool BindValue(const std::string& placeholder, uint32_t value);
+    bool BindValue(const std::string& placeholder, uint64_t value);
+    bool BindValue(const std::string& placeholder, float value);
+    bool BindValue(const std::string& placeholder, bool value);
     virtual bool Exec() = 0;
 
     std::string ErrorString();
@@ -26,10 +31,12 @@ protected:
     std::string m_error;
     std::string m_queryString;
     PGresult *m_pgResult;
+    bool bindValue(const std::string& placeholder, const std::string& value);
 };
 
 
 class PgRecord {
+public:
     class PgField {
     public:
         std::string Value() {return m_value;};
