@@ -20,24 +20,3 @@ StarSystem pgResult2StarSystem(PgRecord *pgRecord) {
     }
     return starSystem;
 }
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-bool checkSelectPgResult(PGresult *pgResult, std::string *error) {
-    bool res = false;
-    do {
-        if (!pgResult) {
-            break;
-        }
-
-        auto result = PQresultStatus(pgResult);
-        if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
-            if (error) {
-                *error = PQresultErrorMessage(pgResult);
-            }
-            break;
-        }
-        res = true;
-    } while(false);
-    return res;
-}

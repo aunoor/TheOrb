@@ -7,6 +7,4 @@
 class PgRecord;
 StarSystem pgResult2StarSystem(PgRecord *pgRecord);
 
-bool checkSelectPgResult(PGresult *pgResult, std::string *error);
-
 #endif //PGHELPERS_H
