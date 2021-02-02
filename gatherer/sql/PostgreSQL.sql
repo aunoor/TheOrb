@@ -48,9 +48,10 @@ CREATE TABLE markets
 CREATE TABLE stations
 (
 	system_id64 bigint NOT NULL,
+	station_id bigint NOT NULL,
 	station_name varchar(500) NOT NULL,
 	market_id bigint NULL,
-	station_type integer NOT NULL,
+	station_type varchar(500) NOT NULL,
 	distance2arrival integer NULL,
 	have_market boolean NULL
 )
@@ -61,6 +62,7 @@ CREATE TABLE systems
 	id integer NOT NULL,
 	id64 bigint NOT NULL,
 	system_name varchar(500) NOT NULL,
+	has_coords boolean NULL,
 	x double precision NULL,
 	y double precision NULL,
 	z double precision NULL,
@@ -92,7 +94,7 @@ CREATE INDEX "IXFK_markets_stations" ON markets ("market_id" ASC)
 ;
 
 ALTER TABLE stations ADD CONSTRAINT "PK_stations_id"
-	PRIMARY KEY ("system_id64")
+	PRIMARY KEY ("station_id")
 ;
 
 CREATE INDEX "IXFK_stations_systems" ON stations ("system_id64" ASC)

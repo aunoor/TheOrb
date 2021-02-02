@@ -5,6 +5,7 @@
 #include "dbmanager/idbprovider.h"
 
 class PgConnPool;
+class PgConnection;
 
 class PgProvider : public IDBProvider {
 public:

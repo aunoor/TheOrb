@@ -10,33 +10,9 @@
 class PgConnection;
 class PgQuery;
 
-class AbstractPgQuery {
-public:
-    explicit AbstractPgQuery(PgConnection *connection);
-    virtual ~AbstractPgQuery();
-    void Prepare(const std::string& query);
-    bool BindValue(const std::string& placeholder, const std::string& value);
-    bool BindValue(const std::string& placeholder, int32_t value);
-    bool BindValue(const std::string& placeholder, int64_t value);
-    bool BindValue(const std::string& placeholder, uint32_t value);
-    bool BindValue(const std::string& placeholder, uint64_t value);
-    bool BindValue(const std::string& placeholder, float value);
-    bool BindValue(const std::string& placeholder, bool value);
-    virtual bool Exec() = 0;
-
-    std::string ErrorString();
-
-protected:
-    PgConnection *m_connection;
-    std::string m_error;
-    std::string m_queryString;
-    PGresult *m_pgResult;
-    bool bindValue(const std::string& placeholder, const std::string& value);
-};
-
-
 class PgRecord {
 public:
+
     class PgField {
     public:
         std::string Value() {return m_value;};
@@ -68,18 +44,41 @@ private:
     friend PgQuery;
 };
 
-class PgQuery : public AbstractPgQuery {
+class PgQuery {
 public:
     explicit PgQuery(PgConnection *connection);
-    bool Exec() override;
+    ~PgQuery();
+
+    bool Exec();
+    bool Exec(const std::string &query);
+
     int RowCount();
     bool Next();
     PgRecord Record();
+
+    void Prepare(const std::string& query);
+    bool BindValue(const std::string& placeholder, const std::string& value);
+    bool BindValue(const std::string& placeholder, int32_t value);
+    bool BindValue(const std::string& placeholder, int64_t value);
+    bool BindValue(const std::string& placeholder, uint32_t value);
+    bool BindValue(const std::string& placeholder, uint64_t value);
+    bool BindValue(const std::string& placeholder, float value);
+    bool BindValue(const std::string& placeholder, bool value);
+
+    std::string ErrorString();
+
+    void Clear();
 private:
     ///Current row
     int64_t m_currentRow;
     ///Row counts returned by select
     int m_rowCnt;
+
+    PgConnection *m_connection;
+    std::string m_error;
+    std::string m_queryString;
+    PGresult *m_pgResult;
+    bool bindValue(const std::string& placeholder, const std::string& value);
 };
 
 

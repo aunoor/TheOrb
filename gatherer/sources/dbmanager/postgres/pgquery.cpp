@@ -1,43 +1,50 @@
 #include "pgquery.h"
+
+#include <utility>
 #include "pgconnection.h"
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-AbstractPgQuery::AbstractPgQuery(PgConnection *connection) {
+PgQuery::PgQuery(PgConnection *connection) {
     m_connection = connection;
     m_pgResult = nullptr;
-}
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-AbstractPgQuery::~AbstractPgQuery() {
-    if (m_pgResult) {
-        PQclear(m_pgResult);
-    }
-}
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-std::string AbstractPgQuery::ErrorString() {
-    return m_error;
-}
-
-//--------------------------------------------------------------------------------------------------------------------//
-
-PgQuery::PgQuery(PgConnection *connection) : AbstractPgQuery (connection) {
     m_currentRow = -1;
     m_rowCnt = 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-void AbstractPgQuery::Prepare(const std::string& query) {
+PgQuery::~PgQuery() {
+    Clear();
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+std::string PgQuery::ErrorString() {
+    return m_error;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+void PgQuery::Clear() {
+    if (m_pgResult) {
+        PQclear(m_pgResult);
+        m_pgResult = nullptr;
+    }
+    m_currentRow = -1;
+    m_rowCnt = 0;
+    m_queryString.clear();
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+void PgQuery::Prepare(const std::string& query) {
     m_queryString = query;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, const std::string& value) {
+bool PgQuery::BindValue(const std::string& placeholder, const std::string& value) {
     auto conv = PQescapeLiteral(m_connection->GetPGconn(), value.c_str(), value.length());
     std::string tmpValue = std::string(conv);
     //std::string tmpValue = "'"+value+"'";
@@ -46,53 +53,60 @@ bool AbstractPgQuery::BindValue(const std::string& placeholder, const std::strin
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, int32_t value) {
+bool PgQuery::BindValue(const std::string& placeholder, int32_t value) {
     std::string tmpValue = std::to_string(value);
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, int64_t value) {
+bool PgQuery::BindValue(const std::string& placeholder, int64_t value) {
     std::string tmpValue = std::to_string(value);
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, uint32_t value) {
+bool PgQuery::BindValue(const std::string& placeholder, uint32_t value) {
     std::string tmpValue = std::to_string(value);
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, uint64_t value) {
+bool PgQuery::BindValue(const std::string& placeholder, uint64_t value) {
     std::string tmpValue = std::to_string(value);
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string& placeholder, float value) {
+bool PgQuery::BindValue(const std::string& placeholder, float value) {
     std::string tmpValue = std::to_string(value);
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::BindValue(const std::string &placeholder, bool value) {
+bool PgQuery::BindValue(const std::string &placeholder, bool value) {
     std::string tmpValue = value?"true":"false";
     return bindValue(placeholder, tmpValue);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool AbstractPgQuery::bindValue(const std::string &placeholder, const std::string &value) {
+bool PgQuery::bindValue(const std::string &placeholder, const std::string &value) {
     auto pos = m_queryString.find(placeholder);
     if (pos == -1) return false;
     m_queryString.replace(pos, placeholder.length(), value);
     return true;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+bool PgQuery::Exec(const std::string &query) {
+    m_queryString = query;
+    return Exec();
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
