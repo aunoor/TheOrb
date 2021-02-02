@@ -149,6 +149,10 @@ bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
         pgQuery.BindValue(":dist", station.Dist2Arrival);
         pgQuery.BindValue(":haveMarket", station.HaveMarket);
         res = pgQuery.Exec();
+        if (!res) {
+            break;
+        }
+
     } while(false);
 
     return res;

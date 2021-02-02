@@ -16,18 +16,19 @@ DROP TABLE IF EXISTS systems CASCADE
 ;
 
 /* Create Tables */
-
+/*
 CREATE TABLE commodities
 (
 	id bigserial NOT NULL,
 	name varchar(500) NULL
 )
 ;
+*/
 
 CREATE TABLE commodity
 (
 	market_id bigint NOT NULL,
-	commodity_id integer NOT NULL,
+	commodity_id varchar(500) NOT NULL,
 	mean_price integer NULL,
 	buy_price integer NULL,
 	stock integer NULL,
@@ -71,15 +72,6 @@ CREATE TABLE systems
 ;
 
 /* Create Primary Keys, Indexes, Uniques, Checks */
-
-ALTER TABLE commodities ADD CONSTRAINT "PK_commodities_id"
-	PRIMARY KEY (id)
-;
-
-ALTER TABLE commodity ADD CONSTRAINT "PK_commodity_id"
-	PRIMARY KEY ("market_id","commodity_id")
-;
-
 CREATE INDEX "IXFK_commodity_commodities" ON commodity ("commodity_id" ASC)
 ;
 
@@ -111,10 +103,6 @@ CREATE INDEX "I_system_name" ON systems ("system_name" ASC)
 ;
 
 /* Create Foreign Key Constraints */
-
-ALTER TABLE commodity ADD CONSTRAINT "FK_commodity_commodities"
-	FOREIGN KEY ("commodity_id") REFERENCES commodities (id) ON DELETE Cascade
-;
 
 ALTER TABLE commodity ADD CONSTRAINT "FK_commodity_markets"
 	FOREIGN KEY ("market_id") REFERENCES markets ("market_id") ON DELETE No Action ON UPDATE No Action
