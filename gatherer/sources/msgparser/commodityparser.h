@@ -5,7 +5,7 @@
 
 class CommodityParser {
 public:
-    static void Parse(rapidjson::Document &document);
+    static bool Parse(rapidjson::Document &document);
 };
 
 

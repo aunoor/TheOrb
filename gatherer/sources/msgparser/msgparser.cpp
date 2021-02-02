@@ -47,14 +47,16 @@ void MsgParser::parseMessage(const std::string &message) {
     }
 
     std::string schemaRef = document[schemaRefName].GetString();
-
-    if (schemaRef == "https://eddn.edcd.io/schemas/journal/1") {
-        ;
-    } else if (schemaRef == "https://eddn.edcd.io/schemas/commodity/3") {
-        std::cout << schemaRef << std::endl;
-        CommodityParser::Parse(document);
-
-    }
+    do {
+        if (schemaRef == "https://eddn.edcd.io/schemas/journal/1") {
+            break;
+        }
+        if (schemaRef == "https://eddn.edcd.io/schemas/commodity/3") {
+            std::cout << schemaRef << std::endl;
+            CommodityParser::Parse(document);
+            break;
+        }
+    } while(false);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
