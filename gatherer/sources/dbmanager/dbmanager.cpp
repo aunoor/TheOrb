@@ -39,6 +39,20 @@ bool DBManager::StoreMarketData(MarketData &marketData) {
     bool res = m_provider->GetSystemByName(marketData.SystemName, starSystem);
     if (!res) return false;
 
-    //
-    return false;
+    Station station;
+    for (const auto& item : starSystem.Stations) {
+        if (item.Name == marketData.StationName) {
+            station = item;
+            break;
+        }
+    }
+
+    if (!station.IsValid) {
+        return false;
+    }
+
+
+
+
+    return true;
 }
