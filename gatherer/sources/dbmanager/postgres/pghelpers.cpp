@@ -20,3 +20,25 @@ StarSystem pgResult2StarSystem(PgRecord *pgRecord) {
     }
     return starSystem;
 }
+
+//--------------------------------------------------------------------------------------------------------------------//
+/*
+	have_market boolean NULL
+ */
+
+Station pgResult2Station(PgRecord *pgRecord) {
+    Station station{};
+    if (pgRecord->IsValid()) {
+        station.Id = std::stoul(pgRecord->Value("station_id"));
+        station.Name = pgRecord->Value("station_name");
+        station.MarketId = std::stoul(pgRecord->Value("market_id"));
+        station.Type = pgRecord->Value("station_type");
+        station.Dist2Arrival = std::stof(pgRecord->Value("distance2arrival"));
+        station.HaveMarket = false;
+        if (!pgRecord->isNull("have_market")) {
+            station.HaveMarket = (pgRecord->Value("have_market") == "true");
+        }
+        station.IsValid = true;
+    }
+    return station;
+}

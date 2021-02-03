@@ -53,7 +53,7 @@ CREATE TABLE stations
 	station_name varchar(500) NOT NULL,
 	market_id bigint NULL,
 	station_type varchar(500) NOT NULL,
-	distance2arrival integer NULL,
+	distance2arrival float8 NULL,
 	have_market boolean NULL
 )
 ;

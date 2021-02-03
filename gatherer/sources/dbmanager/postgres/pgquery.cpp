@@ -139,7 +139,7 @@ int PgQuery::RowCount() {
 
 bool PgQuery::Next() {
     if (m_rowCnt == 0) return false;
-    if (m_currentRow == m_rowCnt) return false;
+    if (m_currentRow == m_rowCnt-1) return false;
     m_currentRow++;
     return true;
 }

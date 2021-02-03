@@ -8,6 +8,7 @@
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon);
+bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon);
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -51,6 +52,13 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
         PgRecord record = pgQuery.Record();
         starSystem = pgResult2StarSystem(&record);
     } while(false);
+
+    if (starSystem.IsValid) {
+        res = getStations(starSystem.Id64, starSystem.Stations, pgCon);
+        if (!res) {
+            starSystem.IsValid = false;
+        }
+    }
 
     m_connPool->ReturnConnection(pgCon);
     return res;
@@ -152,8 +160,36 @@ bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
         if (!res) {
             break;
         }
-
     } while(false);
 
+    return res;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon) {
+    bool res;
+    std::string query;
+    PgQuery pgQuery(pgCon);
+    do {
+        query = "select * from stations where (system_id64=:id64);";
+        pgQuery.Prepare(query);
+        pgQuery.BindValue(":id64", systemId);
+        res = pgQuery.Exec();
+        if (!res) {
+            break;
+        }
+
+        while(pgQuery.Next()) {
+            PgRecord record = pgQuery.Record();
+            auto station = pgResult2Station(&record);
+            if (!station.IsValid) {
+                res = false;
+                break;
+            }
+            stations.push_back(station);
+        }
+
+    } while(false);
     return res;
 }

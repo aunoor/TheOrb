@@ -6,5 +6,6 @@
 
 class PgRecord;
 StarSystem pgResult2StarSystem(PgRecord *pgRecord);
+Station pgResult2Station(PgRecord *pgRecord);
 
 #endif //PGHELPERS_H

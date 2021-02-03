@@ -19,6 +19,8 @@ struct Station {
     std::string Type;
     float Dist2Arrival = -1;
     bool HaveMarket = false;
+
+    bool IsValid = false;
 };
 
 
