@@ -6,7 +6,7 @@
 const char schemaRefName[] = "$schemaRef";
 const char headerName[] = "header";
 const char messageName[] = "message";
-const char commoditiesName[] = "const char ";
+const char commoditiesName[] = "commodities";
 
 
 const char idName[] = "id";

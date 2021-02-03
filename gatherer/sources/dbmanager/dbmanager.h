@@ -17,6 +17,8 @@ public:
 
     bool GetSystemByName(const std::string &name, StarSystem &starSystem);
 
+    bool StoreMarketData(MarketData &marketData);
+
 private:
     IDBProvider *m_provider;
 };

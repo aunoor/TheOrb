@@ -157,11 +157,13 @@ PgRecord PgQuery::Record() {
             field.m_isNull = PQgetisnull(m_pgResult, m_currentRow, i);
             if (!field.m_isNull) {
                 std::string fldValue = PQgetvalue(m_pgResult, m_currentRow, i);
+                field.m_value = fldValue;
             }
             field.m_isValid = true;
             record.m_values.push_back(field);
         }
     }
+    record.m_isValid = true;
     return record;
 }
 

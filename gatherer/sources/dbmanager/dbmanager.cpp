@@ -31,3 +31,9 @@ bool DBManager::GetSystemByName(const std::string &name, StarSystem &starSystem)
     bool res = m_provider->GetSystemByName(name, starSystem);
     return res;
 }
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+bool DBManager::StoreMarketData(MarketData &marketData) {
+    return false;
+}

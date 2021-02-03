@@ -2,6 +2,7 @@
 #define MSGPARSER_H
 
 #include "concurrentqueue.h"
+#include "common/spaceobjects.h"
 
 #include <atomic>
 #include <mutex>
@@ -17,6 +18,8 @@ public:
     void Start();
     ///Add message to incoming queue
     void AddMessageToQueue(std::string message);
+
+    std::function<void(MarketData &marketData)> MarketDataReceived;
 private:
     ///Flag to thread exit
     std::atomic<bool> m_threadBreak{};

@@ -2,10 +2,11 @@
 #define COMMODITYPARSER_H
 
 #include <rapidjson/document.h>
+#include "common/spaceobjects.h"
 
 class CommodityParser {
 public:
-    static bool Parse(rapidjson::Document &document);
+    static bool Parse(rapidjson::Value &message, MarketData &marketData);
 };
 
 

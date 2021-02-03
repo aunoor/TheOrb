@@ -39,10 +39,18 @@ void MsgParser::AddMessageToQueue(std::string message) {
 
 void MsgParser::parseMessage(const std::string &message) {
     rapidjson::Document document;
+
+    //std::cout << message << std::endl;
+
     document.Parse(message.c_str());
 
     if (!document.HasMember(schemaRefName)) {
         //TODO:log
+        return;
+    }
+
+    if (!document.HasMember(messageName)) {
+        //TODO: log
         return;
     }
 
@@ -52,8 +60,12 @@ void MsgParser::parseMessage(const std::string &message) {
             break;
         }
         if (schemaRef == "https://eddn.edcd.io/schemas/commodity/3") {
-            std::cout << schemaRef << std::endl;
-            CommodityParser::Parse(document);
+            if (MarketDataReceived) {
+                MarketData marketData;
+                if (CommodityParser::Parse(document["message"], marketData)) {
+                    MarketDataReceived(marketData);
+                }
+            }
             break;
         }
     } while(false);
