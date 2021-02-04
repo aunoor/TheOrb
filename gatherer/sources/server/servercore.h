@@ -6,12 +6,12 @@
 class EDDNClient;
 class MsgParser;
 class DBManager;
-
 class SrvConfig;
+class SLogger;
 
 class ServerCore {
 public:
-    ServerCore(SrvConfig *config);
+    explicit ServerCore(SrvConfig *config);
     ~ServerCore();
     ///Function return if program can break main loop
     bool CanExit();
@@ -22,12 +22,13 @@ public:
 
 private:
     ///Flag for breaking main loop
-    std::atomic<bool> m_canExit;
+    std::atomic<bool> m_canExit{};
 
     EDDNClient *m_eddnClient;
     MsgParser *m_msgParser;
     DBManager *m_dbManager;
     SrvConfig *m_config;
+    SLogger *m_logger;
 };
 
 

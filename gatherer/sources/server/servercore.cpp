@@ -7,15 +7,20 @@
 #include "dbmanager/postgres/pgprovider.h"
 #include "edsmfetcher/psysfetcher.h"
 #include "edsmfetcher/psysparser.h"
+#include "logger/slogger.h"
 #include  <algorithm>
+
+const std::string scope("ServerCore");
 
 //--------------------------------------------------------------------------------------------------------------------//
 
 ServerCore::ServerCore(SrvConfig *config) {
     m_canExit = false;
+    m_dbManager = nullptr;
     m_eddnClient = nullptr;
     m_msgParser = nullptr;
     m_config = config;
+    m_logger = new SLogger();
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -54,11 +59,12 @@ bool ServerCore::Init() {
 void ServerCore::Start() {
     bool res = m_dbManager->IsSystemsLoaded();
     if (!res) {
+        m_logger->Warning(scope, "It's look like no populated systems in DB. Trying to download list from EDSM.");
         PSysFetcher pSysFetcher;
-        pSysFetcher.DownloadingProgress = [](int32_t current, int32_t length) {
+        pSysFetcher.DownloadingProgress = [this](int32_t current, int32_t length) {
             if (length > 0) {
                 uint32_t progress = ((uint64_t)current * 100L) / length;
-                printf("Downloaded %u from %u (%u%%)\n", current, length, progress);
+                m_logger->Debug(scope, asprintf("Downloaded %u from %u (%u%%)\n", current, length, progress));
             }
         };
         uint64_t sysCnt = 0;
@@ -71,14 +77,14 @@ void ServerCore::Start() {
 
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
-            //TODO: log
+            m_logger->Critical(scope, "Downloading of populated systems failed.");
             m_canExit = true;
             return;
         }
 
-        printf("Downloading finished. %d systems added\n", sysCnt);
+
+        m_logger->Info(scope, asprintf("Downloading finished. %d systems added", sysCnt));
     }
-    //m_canExit = true;
 
 
     m_msgParser->Start();

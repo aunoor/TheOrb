@@ -1,7 +1,9 @@
 #ifndef COMMONDEFS_H
 #define COMMONDEFS_H
 
+#include <cstdarg>
 #include <cstdint>
+#include <cstring>
 #include <string>
 
 struct DBConnParams {
@@ -11,5 +13,21 @@ struct DBConnParams {
     std::string password;
     std::string dbName;
 };
+
+enum ESLogLevel : uint8_t {
+    /// Критические сообщения
+    LL_Critical = 0,
+    /// Предупреждения
+    LL_Warning = 1,
+    /// Информационные сообщения
+    LL_Info = 2,
+    /// Отладочные сообщения
+    LL_Debug = 3,
+    /// Дамп пришедших данных
+    LL_Dump = 4
+};
+
+std::string asprintf(const char *format, ...);
+
 
 #endif //COMMONDEFS_H

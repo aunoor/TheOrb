@@ -1,5 +1,4 @@
 #include "psysfetcher.h"
-
 #include "psysparser.h"
 
 #include <cstdint>
@@ -50,9 +49,6 @@ bool PSysFetcher::FetchPopulatedSystems() {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_func);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
-//    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
-//    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, read_header);
-
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
 
@@ -68,9 +64,6 @@ bool PSysFetcher::FetchPopulatedSystems() {
     m_psysParser->StartParse();
 
     curlRes = curl_easy_perform(curl);
-//    if (curlRes != CURLE_OK) {
-//        break;
-//    }
 
     inflateEnd(&m_strm);
     curl_easy_cleanup(curl);
