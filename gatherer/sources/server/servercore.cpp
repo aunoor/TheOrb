@@ -7,6 +7,7 @@
 #include "dbmanager/postgres/pgprovider.h"
 #include "edsmfetcher/psysfetcher.h"
 #include "edsmfetcher/psysparser.h"
+#include  <algorithm>
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -62,13 +63,15 @@ void ServerCore::Start() {
         };
         uint64_t sysCnt = 0;
         pSysFetcher.SystemReceived = [this, &sysCnt](StarSystem &system) {
-            //TODO: delete carriers
+            //Deleting carriers from station list
+            system.Stations.remove_if([](const Station& station) {return station.Type=="Fleet Carrier";});
             m_dbManager->UpdateSystem(system);
             sysCnt++;
         };
 
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
+            //TODO: log
             m_canExit = true;
             return;
         }

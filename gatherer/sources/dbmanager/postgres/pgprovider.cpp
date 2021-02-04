@@ -90,9 +90,9 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
             break;
         }
         if (pgQuery.RowCount()) {
-            query = "update systems set system_name=:name, x=:x, y=:y, z=:z, require_permit=:permit where (id64 = :id64);";
+            query = "update systems set system_name=:name, has_coords=:has_coords, x=:x, y=:y, z=:z, require_permit=:permit where (id64 = :id64);";
         } else {
-            query = "insert into systems (id, id64, system_name, x, y, z, require_permit) values (:id, :id64, :name, :x, :y, :z, :permit)";
+            query = "insert into systems (id, id64, system_name, has_coords, x, y, z, require_permit) values (:id, :id64, :name, :has_coords, :x, :y, :z, :permit)";
         }
 
         pgQuery.Clear();
@@ -100,6 +100,7 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
         pgQuery.BindValue(":id", system.Id);
         pgQuery.BindValue(":id64", system.Id64);
         pgQuery.BindValue(":name", system.Name);
+        pgQuery.BindValue(":has_coords", system.Coords.IsValid);
         pgQuery.BindValue(":x", system.Coords.x);
         pgQuery.BindValue(":y", system.Coords.y);
         pgQuery.BindValue(":z", system.Coords.z);

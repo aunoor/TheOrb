@@ -133,6 +133,7 @@ bool PSysParser::parseSystemObject(rapidjson::Value &object) {
         return false;
     }
     starSystem.Coords = coords;
+    starSystem.Coords.IsValid = true;
 
     if (object.HasMember(stationsName)) {
         auto stations = object[stationsName].GetArray();
