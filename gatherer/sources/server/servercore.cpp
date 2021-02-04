@@ -62,6 +62,7 @@ void ServerCore::Start() {
         };
         uint64_t sysCnt = 0;
         pSysFetcher.SystemReceived = [this, &sysCnt](StarSystem &system) {
+            //TODO: delete carriers
             m_dbManager->UpdateSystem(system);
             sysCnt++;
         };

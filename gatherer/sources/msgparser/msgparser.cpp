@@ -60,6 +60,7 @@ void MsgParser::parseMessage(const std::string &message) {
             break;
         }
         if (schemaRef == "https://eddn.edcd.io/schemas/commodity/3") {
+            std::cout << message << std::endl;
             if (MarketDataReceived) {
                 MarketData marketData;
                 if (CommodityParser::Parse(document["message"], marketData)) {

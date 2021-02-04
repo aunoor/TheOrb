@@ -36,7 +36,7 @@ Station pgResult2Station(PgRecord *pgRecord) {
         station.Dist2Arrival = std::stof(pgRecord->Value("distance2arrival"));
         station.HaveMarket = false;
         if (!pgRecord->isNull("have_market")) {
-            station.HaveMarket = (pgRecord->Value("have_market") == "true");
+            station.HaveMarket = (pgRecord->Value("have_market") == "t");
         }
         station.IsValid = true;
     }

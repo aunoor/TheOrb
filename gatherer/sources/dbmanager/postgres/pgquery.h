@@ -2,6 +2,7 @@
 #define PGQUERY_H
 
 #include <libpq-fe.h>
+#include <ctime>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -64,6 +65,7 @@ public:
     bool BindValue(const std::string& placeholder, uint64_t value);
     bool BindValue(const std::string& placeholder, float value);
     bool BindValue(const std::string& placeholder, bool value);
+    bool BindValue(const std::string& placeholder, std::tm timeStamp);
 
     std::string ErrorString();
 

@@ -35,24 +35,6 @@ bool DBManager::GetSystemByName(const std::string &name, StarSystem &starSystem)
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool DBManager::StoreMarketData(MarketData &marketData) {
-    StarSystem starSystem;
-    bool res = m_provider->GetSystemByName(marketData.SystemName, starSystem);
-    if (!res) return false;
-
-    Station station;
-    for (const auto& item : starSystem.Stations) {
-        if (item.Name == marketData.StationName) {
-            station = item;
-            break;
-        }
-    }
-
-    if (!station.IsValid) {
-        return false;
-    }
-
-
-
-
-    return true;
+    bool res = m_provider->UpdateMarketData(marketData);
+    return res;
 }

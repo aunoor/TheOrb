@@ -19,6 +19,7 @@ struct Station {
     std::string Type;
     float Dist2Arrival = -1;
     bool HaveMarket = false;
+    uint64_t SystemId64 = -1;
 
     bool IsValid = false;
 };
@@ -36,21 +37,21 @@ struct StarSystem {
 };
 
 struct Commodity {
-    uint32_t BuyPrice;
-    uint32_t Demand;
-    uint32_t DemandBracket;
-    uint32_t MeanPrice;
+    uint32_t BuyPrice = 0;
+    uint32_t Demand = 0;
+    int32_t DemandBracket=-1;
+    uint32_t MeanPrice = 0;
     std::string Name;
-    uint32_t SellPrice;
-    uint32_t Stock;
-    uint32_t StockBracket;
+    uint32_t SellPrice = 0;
+    uint32_t Stock = 0;
+    int32_t StockBracket = -1;
 };
 
 struct MarketData {
     uint64_t MarketId;
     std::string StationName;
     std::string SystemName;
-    std::tm Timestamp;
+    std::tm Timestamp = {};
     std::list<Commodity> Commodities;
 };
 

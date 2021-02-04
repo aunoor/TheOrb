@@ -18,6 +18,8 @@ public:
 
     bool UpdateSystem(StarSystem &system) override;
 
+    bool UpdateMarketData(MarketData &marketData) override;
+
 private:
     PgConnPool *m_connPool;
 };

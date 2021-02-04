@@ -128,6 +128,75 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
+bool PgProvider::UpdateMarketData(MarketData &marketData) {
+
+    auto pgCon = m_connPool->GetConnection();
+    if (pgCon == nullptr) {
+        return false;
+    }
+    PgQuery pgQuery(pgCon);
+    bool res;
+    std::string query;
+    do {
+        res = pgQuery.Exec("begin transaction;");
+        if (!res) {
+            //TODO: log
+            break;
+        }
+
+        pgQuery.Clear();
+        pgQuery.Prepare("delete from commodity where(market_id=:market_id);");
+        pgQuery.BindValue(":market_id", marketData.MarketId);
+        res = pgQuery.Exec();
+        if (!res) {
+            //TODO: log
+            break;
+        }
+
+        pgQuery.Clear();
+        pgQuery.Prepare("INSERT INTO markets (market_id, updated) VALUES (:market_id, :updated) ON CONFLICT (market_id) DO UPDATE SET updated = EXCLUDED.updated;");
+        pgQuery.BindValue(":market_id", marketData.MarketId);
+        pgQuery.BindValue(":updated", marketData.Timestamp);
+        res = pgQuery.Exec();
+        if (!res) {
+            //TODO: log
+            break;
+        }
+
+        for (const auto& item : marketData.Commodities) {
+            pgQuery.Clear();
+            pgQuery.Prepare("INSERT INTO commodity (market_id, commodity_id, mean_price, buy_price, stock, stock_bracket, sell_price, demand, demand_bracket) VALUES (:market_id, :commodity_id, :mean_price, :buy_price, :stock, :stock_bracket, :sell_price, :demand, :demand_bracket);");
+            pgQuery.BindValue(":market_id", marketData.MarketId);
+            pgQuery.BindValue(":commodity_id", item.Name);
+            pgQuery.BindValue(":mean_price", item.MeanPrice);
+            pgQuery.BindValue(":buy_price", item.BuyPrice);
+            pgQuery.BindValue(":stock", item.Stock);
+            pgQuery.BindValue(":stock_bracket", item.StockBracket);
+            pgQuery.BindValue(":sell_price", item.SellPrice);
+            pgQuery.BindValue(":demand", item.Demand);
+            pgQuery.BindValue(":demand_bracket", item.DemandBracket);
+            res = pgQuery.Exec();
+            if (!res) {
+                //TODO: log
+                break;
+            }
+        }
+        if (!res) {
+            break;
+        }
+
+        res = pgQuery.Exec("commit transaction;");
+    } while(false);
+
+    if (!res) {
+        pgQuery.Exec("rollback transaction;");
+    }
+    m_connPool->ReturnConnection(pgCon);
+    return res;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
 bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
     bool res;
     std::string query;

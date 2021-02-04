@@ -1,5 +1,7 @@
 #include "pgquery.h"
 
+#include <iomanip>
+#include <sstream>
 #include <utility>
 #include "pgconnection.h"
 
@@ -47,7 +49,7 @@ void PgQuery::Prepare(const std::string& query) {
 bool PgQuery::BindValue(const std::string& placeholder, const std::string& value) {
     auto conv = PQescapeLiteral(m_connection->GetPGconn(), value.c_str(), value.length());
     std::string tmpValue = std::string(conv);
-    //std::string tmpValue = "'"+value+"'";
+    PQfreemem(conv);
     return bindValue(placeholder, tmpValue);
 }
 
@@ -91,6 +93,14 @@ bool PgQuery::BindValue(const std::string& placeholder, float value) {
 bool PgQuery::BindValue(const std::string &placeholder, bool value) {
     std::string tmpValue = value?"true":"false";
     return bindValue(placeholder, tmpValue);
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+bool PgQuery::BindValue(const std::string &placeholder, struct tm timeStamp) {
+    std::ostringstream s;
+    s << std::put_time(&timeStamp, "%Y-%m-%d %H:%M:%SZ");
+    return BindValue(placeholder, s.str());
 }
 
 //--------------------------------------------------------------------------------------------------------------------//

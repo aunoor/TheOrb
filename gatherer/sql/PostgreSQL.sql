@@ -15,16 +15,6 @@ DROP TABLE IF EXISTS stations CASCADE
 DROP TABLE IF EXISTS systems CASCADE
 ;
 
-/* Create Tables */
-/*
-CREATE TABLE commodities
-(
-	id bigserial NOT NULL,
-	name varchar(500) NULL
-)
-;
-*/
-
 CREATE TABLE commodity
 (
 	market_id bigint NOT NULL,
