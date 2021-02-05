@@ -1,10 +1,10 @@
 #include "msgparser.h"
 
-#include "common/schemadefs.h"
+#include "eddndefs.h"
 #include "commodityparser.h"
+#include "logger/slogger.h"
 
 #include <rapidjson/document.h>
-#include <iostream>
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -31,7 +31,7 @@ void MsgParser::Start() {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-void MsgParser::AddMessageToQueue(std::string message) {
+void MsgParser::AddMessageToQueue(const std::string &message) {
     m_msgQueue.AddItem(message);
 }
 
@@ -40,17 +40,17 @@ void MsgParser::AddMessageToQueue(std::string message) {
 void MsgParser::parseMessage(const std::string &message) {
     rapidjson::Document document;
 
-    //std::cout << message << std::endl;
+    SLogger::Dump("EDDN", message);
 
     document.Parse(message.c_str());
 
     if (!document.HasMember(schemaRefName)) {
-        //TODO:log
+        SLogger::Warning("MsgParser", "Message don't have schemaref field");
         return;
     }
 
     if (!document.HasMember(messageName)) {
-        //TODO: log
+        SLogger::Warning("MsgParser", "Message don't have message field");
         return;
     }
 
@@ -60,11 +60,14 @@ void MsgParser::parseMessage(const std::string &message) {
             break;
         }
         if (schemaRef == "https://eddn.edcd.io/schemas/commodity/3") {
-            std::cout << message << std::endl;
+
             if (MarketDataReceived) {
                 MarketData marketData;
                 if (CommodityParser::Parse(document["message"], marketData)) {
+                    SLogger::Info("MsgParser", asprintf("Received commodity data for %s->%s",marketData.SystemName.c_str(), marketData.StationName.c_str()));
                     MarketDataReceived(marketData);
+                } else {
+                    SLogger::Warning("MsgParser", "Failed to parse Commodity message.");
                 }
             }
             break;

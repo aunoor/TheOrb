@@ -1,4 +1,6 @@
 #include "commondefs.h"
+#include <cstdarg>
+#include <cstring>
 
 std::string asprintf(const char *format, ...) {
     char buffer[1024];

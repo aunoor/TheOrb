@@ -1,11 +1,13 @@
 #include "server/servercore.h"
 #include "server/srvconfig.h"
+#include "logger/slogger.h"
 
 #include <chrono>
 #include <thread>
 
 int main(int argc, char *argv[])
 {
+    SLogger::GetInstance()->SetLogLevel(LL_Debug);
 
     SrvConfig config;
     if (!config.ParseConfig(argc, argv)) {

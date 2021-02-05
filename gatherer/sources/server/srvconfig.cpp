@@ -1,5 +1,7 @@
 #include "srvconfig.h"
 
+#include "logger/slogger.h"
+
 #include <rapidjson/document.h>
 #include <rapidjson/filereadstream.h>
 
@@ -8,7 +10,9 @@
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-SrvConfig::SrvConfig() = default;
+SrvConfig::SrvConfig() {
+    m_spURL = "https://www.edsm.net/dump/systemsPopulated.json.gz";
+}
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -61,8 +65,16 @@ bool SrvConfig::parseConfigFile() {
     bool res = true;
     if (document.HasMember("db")) {
         res = parseDBObject(document["db"]);
-    }
 
+    }
+    if (document.HasMember("spURL")) {
+        if (document["spURL"].IsString()) {
+            m_spURL = document["spURL"].GetString();
+        } else {
+            printf("Invalid value for spURL.");
+            res = false;
+        }
+    }
 
     return res;
 }
@@ -132,6 +144,10 @@ bool SrvConfig::parseDBObject(rapidjson::Value &object) {
 
 DBConnParams SrvConfig::GetDBParams() {
     return m_dbParams;
+}
+
+std::string SrvConfig::GetSPURL() {
+    return m_spURL;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//

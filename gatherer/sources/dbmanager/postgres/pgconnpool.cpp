@@ -6,19 +6,11 @@
 PgConnPool::PgConnPool(DBConnParams &params, uint8_t maxConn) {
     m_params = params;
     m_maxConn = maxConn;
-    m_loopBreak = false;
-    m_thread = nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
 
 PgConnPool::~PgConnPool() {
-    m_loopBreak = true;
-    if (m_thread) {
-        m_thread->join();
-        delete m_thread;
-    }
-
     for (auto connInfo : m_connections) {
         delete connInfo;
     }
@@ -36,9 +28,6 @@ bool PgConnPool::Init() {
 
     //if all ok then adding opened connection to pool
     m_connections.push_back(connInfo);
-
-//    m_thread = new std::thread(&PgConnPool::threadFunction, this);
-
     return true;
 }
 
@@ -111,12 +100,3 @@ void PgConnPool::removeConnection(PgConnPool::SConnInfo *connInfo) {
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
-
-void PgConnPool::threadFunction() {
-    do {
-        if (m_loopBreak) break;
-
-
-        std::this_thread::yield();
-    } while(true);
-}

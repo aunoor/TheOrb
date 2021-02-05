@@ -3,6 +3,9 @@
 
 DBManager::DBManager(IDBProvider *provider) {
     m_provider = provider;
+    m_provider->LogMsg = [](ESLogLevel msgType, const std::string &event) {
+        SLogger::GetInstance()->LogMessage(msgType, "DBProvider", event);
+    };
 }
 
 //--------------------------------------------------------------------------------------------------------------------//

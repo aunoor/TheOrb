@@ -11,10 +11,13 @@ public:
     bool ParseConfig(int argc, char **argv);
     ///Return connection params
     DBConnParams GetDBParams();
+    ///Function return url for EDSM systemsPopulated json file.
+    std::string GetSPURL();
 
 private:
     std::string m_cfgFileName;
     DBConnParams m_dbParams{};
+    std::string m_spURL;
 
     void printHelp();
     bool parseConfigFile();

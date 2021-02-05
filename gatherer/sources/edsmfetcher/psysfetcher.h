@@ -16,7 +16,7 @@ class PSysParser;
 ///Class for fetching EDMS populated systems json file
 class PSysFetcher {
 public:
-    PSysFetcher();
+    PSysFetcher(std::string url);
     ///Fetch json file from EDSM
     bool FetchPopulatedSystems();
 
@@ -26,10 +26,9 @@ public:
 private:
     //Marker to break download process
     bool needDlBreak;
-
     z_stream m_strm{};
-
     PSysParser *m_psysParser;
+    std::string m_spURL;
 
     size_t writeFunc(void *data, size_t size, size_t nmemb);
     void progressCallback(int64_t dltotal, int64_t dlnow);

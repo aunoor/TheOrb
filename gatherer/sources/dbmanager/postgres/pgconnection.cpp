@@ -38,7 +38,7 @@ PgConnection::~PgConnection() {
 bool PgConnection::Open() {
     m_pgConn = PQconnectdb(m_connInfo.c_str());
     if(PQstatus(m_pgConn)!= CONNECTION_OK){
-        printf("Connection to database failed:%s\n", PQerrorMessage(m_pgConn));
+        //printf("Connection to database failed:%s\n", PQerrorMessage(m_pgConn));
     }
 
     return (PQstatus(m_pgConn) == CONNECTION_OK);

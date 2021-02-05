@@ -3,6 +3,8 @@
 
 #include "common/spaceobjects.h"
 #include "common/concurrentqueue.h"
+#include "common/commondefs.h"
+
 #include <rapidjson/document.h>
 #include <functional>
 #include <string>
@@ -25,6 +27,7 @@ public:
     void StartParse();
 
     std::function<void(StarSystem &system)> SystemReceived;
+    std::function<void(ESLogLevel msgType, const std::string &event)> LogMsg;
 
 private:
     ///Current state of object extractor
@@ -36,6 +39,7 @@ private:
 
     bool parseSystemObject(std::string &object);
     bool parseSystemObject(rapidjson::Value &object);
+    void logMsg(ESLogLevel msgType, const std::string &event);
 };
 
 

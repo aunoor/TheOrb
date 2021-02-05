@@ -1,13 +1,5 @@
-#ifndef SCHEMADEFS_H
-#define SCHEMADEFS_H
-
-#include <string>
-
-const char schemaRefName[] = "$schemaRef";
-const char headerName[] = "header";
-const char messageName[] = "message";
-const char commoditiesName[] = "commodities";
-
+#ifndef EDSMDEFS_H
+#define EDSMDEFS_H
 
 const char idName[] = "id";
 const char id64Name[] = "id64";
@@ -19,5 +11,4 @@ const char typeName[] = "type";
 const char dist2ArrivalName[] = "distanceToArrival";
 const char haveMarketName[] = "haveMarket";
 
-
-#endif //SCHEMADEFS_H
+#endif //EDSMDEFS_H

@@ -22,6 +22,9 @@ public:
 
 private:
     PgConnPool *m_connPool;
+    void logMsg(ESLogLevel msgType, const std::string &event);
+    bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon);
+    bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon);
 };
 
 

@@ -1,4 +1,5 @@
 #include "eddnclient.h"
+#include "logger/slogger.h"
 
 #include <zlib.h>
 #include <zmq.h>
@@ -6,6 +7,10 @@
 #include <chrono>
 #include <string>
 #include <utility>
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+const char scope[] = "EDDNClient";
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -51,15 +56,16 @@ void EDDNClient::threadFunction() {
 
         if (!isConnected) {
             //start trying connect to EDDN
+            SLogger::Info(scope, "Trying connect to EDDN stream...");
             do {
                 zmqRes = zmq_connect(socket, m_eddnAddress.c_str());
                 if (zmqRes != 0) {
-                    //TODO: write to log
+                    SLogger::Warning(scope, "Connectiong to EDDN failed.");
                     break;
                 }
                 zmqRes = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, "", 0);
                 if (zmqRes != 0) {
-                    //TODO: write to log
+                    SLogger::Warning(scope, "Failing set ZMQ socket params.");
                     zmq_close(socket);
                     break;
                 }
@@ -67,17 +73,19 @@ void EDDNClient::threadFunction() {
             } while (false);
 
             if (!isConnected) {
+                SLogger::Warning(scope, "Connect to EDDN failed.");
                 //wait for 5 sec before reconnect
                 std::this_thread::sleep_for(std::chrono::milliseconds(5000));
                 continue;
+            } else {
+                SLogger::Info(scope, "Connect to EDDN successful.");
             }
         }//if (!isConnected)
-
 
         zmq_msg_t msg;
         zmqRes = zmq_msg_init(&msg);
         if (zmqRes != 0) {
-            //TODO: log
+            SLogger::Critical(scope, "Fail to init ZMQ msg.");
             break;
         }
 
@@ -85,7 +93,7 @@ void EDDNClient::threadFunction() {
             //receive messages in blocking mode
             zmqRes = zmq_msg_recv(&msg, socket, 0);
             if (zmqRes < 0) {
-                //TODO: log
+                SLogger::Critical(scope, "Fail to receive ZMQ msg.");
                 zmq_close(context);
                 isConnected = false;
                 break;
@@ -101,7 +109,7 @@ void EDDNClient::threadFunction() {
                         MessageReceived(resStr);
                     }
                 } else {
-                    //TODO: log
+                    SLogger::Critical(scope, "Fail to inflate EDDN msg.");
                 }
             }
         } while(false);

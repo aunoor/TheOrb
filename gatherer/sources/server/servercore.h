@@ -28,7 +28,6 @@ private:
     MsgParser *m_msgParser;
     DBManager *m_dbManager;
     SrvConfig *m_config;
-    SLogger *m_logger;
 };
 
 

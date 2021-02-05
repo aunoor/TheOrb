@@ -1,8 +1,10 @@
 #include "psysfetcher.h"
 #include "psysparser.h"
+#include "logger/slogger.h"
 
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define DEFL_CHUNK 1024*1024
@@ -22,9 +24,10 @@ int progress_callback(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl
 }
 //--------------------------------------------------------------------------------------------------------------------//
 
-PSysFetcher::PSysFetcher() {
+PSysFetcher::PSysFetcher(std::string url) {
     needDlBreak = false;
     m_psysParser = nullptr;
+    m_spURL = std::move(url);
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -43,8 +46,7 @@ bool PSysFetcher::FetchPopulatedSystems() {
     }
 
     CURLcode curlRes;
-    //curl_easy_setopt(curl, CURLOPT_URL, "https://www.edsm.net/dump/systemsPopulated.json.gz");
-    curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8000/systemsPopulated.json.gz");
+    curl_easy_setopt(curl, CURLOPT_URL, m_spURL.c_str());
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_func);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
@@ -60,6 +62,9 @@ bool PSysFetcher::FetchPopulatedSystems() {
         if (this->SystemReceived) {
             SystemReceived(system);
         }
+    };
+    m_psysParser->LogMsg = [](ESLogLevel msgType, const std::string &event) {
+        SLogger::GetInstance()->LogMessage(LL_Debug, "PSysParser", event);
     };
     m_psysParser->StartParse();
 
@@ -92,7 +97,6 @@ size_t PSysFetcher::writeFunc(void *data, size_t size, size_t nmemb) {
     int ret = inflate(&m_strm, Z_NO_FLUSH);
     if (ret == Z_STREAM_END) {
         ret = Z_OK;
-        //return 0;
     }
     if (ret != Z_OK) {
         return 0;
@@ -101,7 +105,6 @@ size_t PSysFetcher::writeFunc(void *data, size_t size, size_t nmemb) {
 
     bool res = m_psysParser->AddData(out, actual);
     if (!res) {
-        printf("Download canceled by AddData\n");
         return 0;
     }
 

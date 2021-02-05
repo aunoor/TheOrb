@@ -1,5 +1,8 @@
 #include "slogger.h"
-#include <cstdarg>
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+static SLogger *m_instance = nullptr;
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -42,6 +45,15 @@ void FallbackMessageLog(const std::string &msgLevel, const std::string &scope, c
 
 //--------------------------------------------------------------------------------------------------------------------//
 
+SLogger *SLogger::GetInstance() {
+    if (m_instance == nullptr) {
+        m_instance = new SLogger();
+    }
+    return m_instance;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
 SLogger::SLogger() {
     m_logLevel = LL_Warning;
 }
@@ -55,10 +67,12 @@ void SLogger::SetLogLevel(ESLogLevel level) {
 //--------------------------------------------------------------------------------------------------------------------//
 
 void SLogger::LogMessage(ESLogLevel msgType, const std::string &scope, const std::string &event) {
-    if (msgType == LL_Dump) {
+    if (msgType > m_logLevel) return;
 
+    if (msgType == LL_Dump) {
         return;
     }
+
 
     FallbackMessageLog(EType2String(msgType), scope, event);
 }
@@ -66,17 +80,21 @@ void SLogger::LogMessage(ESLogLevel msgType, const std::string &scope, const std
 //--------------------------------------------------------------------------------------------------------------------//
 
 void SLogger::Debug(const std::string &scope, const std::string &event) {
-    LogMessage(LL_Debug, scope, event);
+    SLogger::GetInstance()->LogMessage(LL_Debug, scope, event);
 }
 
 void SLogger::Info(const std::string &scope, const std::string &event) {
-    LogMessage(LL_Info, scope, event);
+    SLogger::GetInstance()->LogMessage(LL_Info, scope, event);
 }
 
 void SLogger::Warning(const std::string &scope, const std::string &event) {
-    LogMessage(LL_Warning, scope, event);
+    SLogger::GetInstance()->LogMessage(LL_Warning, scope, event);
 }
 
 void SLogger::Critical(const std::string &scope, const std::string &event) {
-    LogMessage(LL_Critical, scope, event);
+    SLogger::GetInstance()->LogMessage(LL_Critical, scope, event);
+}
+
+void SLogger::Dump(const std::string &scope, const std::string &event) {
+    SLogger::GetInstance()->LogMessage(LL_Dump, scope, event);
 }

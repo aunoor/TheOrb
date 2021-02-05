@@ -1,6 +1,7 @@
 #include "psysparser.h"
 #include "common/json_helpers.h"
-#include "common/schemadefs.h"
+#include "edsmdefs.h"
+
 #include <cctype>
 
 
@@ -34,7 +35,7 @@ bool PSysParser::AddData(const char *data, size_t length) {
                 if (c == '[') {
                     m_state = epsWaitObjectStart;
                 } else {
-                    printf("Can't find array opening brace\n");
+                    logMsg(LL_Critical, "PSysParser::AddData(): Can't find array opening brace.");
                     return false;
                 }
                 break;
@@ -48,7 +49,7 @@ bool PSysParser::AddData(const char *data, size_t length) {
                     m_objectStr = c;
                     m_bracesCount = 1;
                 } else {
-                    printf("Can't find object opening brace\n");
+                    logMsg(LL_Critical, "PSysParser::AddData(): Can't find object opening brace.");
                     return false;
                 }
                 break;
@@ -62,8 +63,8 @@ bool PSysParser::AddData(const char *data, size_t length) {
                 }
                 if (m_bracesCount == 0) {
                     m_state = epsWaitObjectStart;
-                    //printf("%s\n",m_objectStr.c_str());
                     if (!parseSystemObject(m_objectStr)) {
+                        logMsg(LL_Critical, "PSysParser::AddData(): Error parse sysobject json string.");
                         return false;
                     }
                 }
@@ -82,7 +83,7 @@ bool PSysParser::parseSystemObject(std::string &object) {
     rapidjson::Document document;
     document.Parse(object.c_str());
     if (document.IsNull()) {
-        printf("Error while parse sysobject\n");
+        return false;
     }
     bool res = parseSystemObject(document);
     return res;
@@ -97,15 +98,6 @@ void PSysParser::StartParse() {
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool PSysParser::parseSystemObject(rapidjson::Value &object) {
-//    "id": 480,
-//    "id64": 16063312045545,
-//    "name": "Narasa",
-//    "coords": {
-//        "x": -50.78125,
-//        "y": 22.59375,
-//        "z": 168.3125
-//    },
-
     StarSystem starSystem;
 
     if (!object.HasMember(idName)) {
@@ -154,15 +146,6 @@ bool PSysParser::parseSystemObject(rapidjson::Value &object) {
 //--------------------------------------------------------------------------------------------------------------------//
 
 bool parseStations(rapidjson::Value &object, StarSystem &starSystem) {
-/*
-      "id": 38927,
-      "marketId": 3231025920,
-      "type": "Outpost",
-      "name": "Fancher Enterprise",
-      "distanceToArrival": 19.925188,
-      "haveMarket": true,
- */
-
     Station station;
     //id
     if (!object.HasMember(idName) || object[idName].IsNull()) {
@@ -212,5 +195,10 @@ bool parseStations(rapidjson::Value &object, StarSystem &starSystem) {
     return true;
 }
 
+//--------------------------------------------------------------------------------------------------------------------//
 
-
+void PSysParser::logMsg(ESLogLevel msgType, const std::string &event) {
+    if (LogMsg) {
+        LogMsg(msgType, event);
+    }
+}

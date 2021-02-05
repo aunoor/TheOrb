@@ -7,11 +7,6 @@
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon);
-bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon);
-
-//--------------------------------------------------------------------------------------------------------------------//
-
 PgProvider::PgProvider(DBConnParams params) {
     m_connPool = new PgConnPool(params, 3);
 }
@@ -34,6 +29,7 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
 
     auto pgCon = m_connPool->GetConnection();
     if (pgCon == nullptr) {
+        logMsg(LL_Critical, "PgProvider::GetSystemByName(): Can't get connection to DB.");
         return false;
     }
 
@@ -45,7 +41,7 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
     do {
         res = pgQuery.Exec();
         if (!res) {
-            printf(pgQuery.ErrorString().c_str());
+            logMsg(LL_Critical, asprintf("PgProvider::GetSystemByName(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
         if (!pgQuery.Next()) break;
@@ -69,6 +65,7 @@ bool PgProvider::GetSystemByName(const std::string &name, StarSystem &starSystem
 bool PgProvider::UpdateSystem(StarSystem &system) {
     auto pgCon = m_connPool->GetConnection();
     if (pgCon == nullptr) {
+        logMsg(LL_Critical, "PgProvider::UpdateSystem(): Can't get connection to DB.");
         return false;
     }
     PgQuery pgQuery(pgCon);
@@ -76,7 +73,7 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
     do {
         res = pgQuery.Exec("begin transaction;");
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateSystem(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -86,7 +83,7 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
         pgQuery.BindValue(":id64", system.Id64);
         res = pgQuery.Exec();
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateSystem(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
         if (pgQuery.RowCount()) {
@@ -107,17 +104,19 @@ bool PgProvider::UpdateSystem(StarSystem &system) {
         pgQuery.BindValue(":permit", system.RequirePermit);
         res = pgQuery.Exec();
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateSystem(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
-        //TODO: store stations
         for (auto &station : system.Stations) {
             res = updateStation(station, system.Id64, pgCon);
             if (!res) break;
         }
 
         res = pgQuery.Exec("commit transaction;");
+        if (!res) {
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateSystem(): SQL error: %s", pgQuery.ErrorString().c_str()));;
+        }
     } while(false);
 
     if (!res) {
@@ -133,6 +132,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
 
     auto pgCon = m_connPool->GetConnection();
     if (pgCon == nullptr) {
+        logMsg(LL_Critical, "PgProvider::UpdateMarketData(): Can't get connection to DB.");
         return false;
     }
     PgQuery pgQuery(pgCon);
@@ -141,7 +141,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
     do {
         res = pgQuery.Exec("begin transaction;");
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateMarketData(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -150,7 +150,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
         pgQuery.BindValue(":market_id", marketData.MarketId);
         res = pgQuery.Exec();
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateMarketData(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -160,7 +160,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
         pgQuery.BindValue(":updated", marketData.Timestamp);
         res = pgQuery.Exec();
         if (!res) {
-            //TODO: log
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateMarketData(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -178,7 +178,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
             pgQuery.BindValue(":demand_bracket", item.DemandBracket);
             res = pgQuery.Exec();
             if (!res) {
-                //TODO: log
+                logMsg(LL_Critical, asprintf("PgProvider::UpdateMarketData(): SQL error: %s", pgQuery.ErrorString().c_str()));;
                 break;
             }
         }
@@ -187,6 +187,9 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
         }
 
         res = pgQuery.Exec("commit transaction;");
+        if (!res) {
+            logMsg(LL_Critical, asprintf("PgProvider::UpdateMarketData(): SQL error: %s", pgQuery.ErrorString().c_str()));;
+        }
     } while(false);
 
     if (!res) {
@@ -198,7 +201,7 @@ bool PgProvider::UpdateMarketData(MarketData &marketData) {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
+bool PgProvider::updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
     bool res;
     std::string query;
     PgQuery pgQuery(pgCon);
@@ -209,6 +212,7 @@ bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
         pgQuery.BindValue(":id", station.Id);
         res = pgQuery.Exec();
         if (!res) {
+            logMsg(LL_Critical, asprintf("PgProvider::updateStation(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -228,6 +232,7 @@ bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
         pgQuery.BindValue(":haveMarket", station.HaveMarket);
         res = pgQuery.Exec();
         if (!res) {
+            logMsg(LL_Critical, asprintf("PgProvider::updateStation(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
     } while(false);
@@ -237,7 +242,7 @@ bool updateStation(Station &station, uint64_t systemId, PgConnection *pgCon) {
 
 //--------------------------------------------------------------------------------------------------------------------//
 
-bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon) {
+bool PgProvider::getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *pgCon) {
     bool res;
     std::string query;
     PgQuery pgQuery(pgCon);
@@ -247,6 +252,7 @@ bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *
         pgQuery.BindValue(":id64", systemId);
         res = pgQuery.Exec();
         if (!res) {
+            logMsg(LL_Critical, asprintf("PgProvider::getStations(): SQL error: %s", pgQuery.ErrorString().c_str()));;
             break;
         }
 
@@ -262,4 +268,12 @@ bool getStations(uint64_t systemId, std::list<Station> &stations, PgConnection *
 
     } while(false);
     return res;
+}
+
+//--------------------------------------------------------------------------------------------------------------------//
+
+void PgProvider::logMsg(ESLogLevel msgType, const std::string &event) {
+    if (LogMsg) {
+        LogMsg(msgType, event);
+    }
 }

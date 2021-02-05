@@ -18,8 +18,6 @@ file(GLOB MSGPARSER_SOURCE_FILES msgparser/*.cpp msgparser/*.h)
 file(GLOB DBMANAGER_SOURCE_FILES dbmanager/*.cpp dbmanager/*.h dbmanager/postgres/*.cpp dbmanager/postgres/*.h)
 file(GLOB EDSMFETCHER_SOURCE_FILES edsmfetcher/*.cpp edsmfetcher/*.h)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/server)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/common)
 include_directories(${ZeroMQ_INCLUDE_DIR})
 include_directories(${RAPIDJSON_INCLUDE_DIRS})
 include_directories(${CURL_INCLUDE_DIRS})

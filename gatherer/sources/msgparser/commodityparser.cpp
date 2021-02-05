@@ -2,32 +2,18 @@
 #include <sstream>
 
 #include "commodityparser.h"
-#include "common/schemadefs.h"
+#include "eddndefs.h"
 
 
 bool CommodityParser::Parse(rapidjson::Value &message, MarketData &marketData) {
-
-//    if (!message.HasMember(headerName)) {
-//        //TODO: log
-//        return false;
-//    }
-
     marketData.MarketId = message["marketId"].GetUint64();
     marketData.StationName = message["stationName"].GetString();
     marketData.SystemName = message["systemName"].GetString();
 
     std::string ts = message["timestamp"].GetString();
     std::istringstream ss(ts);
-    //"2021-01-22T12:43:45Z"
+    //incoming value: "2021-01-22T12:43:45Z"
     ss >> std::get_time(&marketData.Timestamp, "%Y-%m-%dT%H:%M:%S");
-
-
-//    auto message = message[messageName].GetObject();
-//    if (!message.HasMember(commoditiesName)) {
-//        //TODO: log
-//        return false;
-//    }
-
     if (!message[commoditiesName].IsArray()) {
         //TODO: log
         return false;

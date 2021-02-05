@@ -2,6 +2,8 @@
 #define DBMANAGER_H
 
 #include "common/spaceobjects.h"
+#include "logger/slogger.h"
+#include <functional>
 #include <string>
 
 class IDBProvider;

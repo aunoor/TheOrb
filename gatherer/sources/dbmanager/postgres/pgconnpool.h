@@ -41,12 +41,6 @@ private:
     DBConnParams m_params;
     std::list<SConnInfo*> m_connections;
 
-    std::atomic<bool> m_loopBreak{};
-
-    std::thread *m_thread;
-    ///Thread loop function
-    void threadFunction();
-
     SConnInfo *createConnection();
     void removeConnection(SConnInfo* connInfo);
 };

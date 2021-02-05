@@ -8,9 +8,8 @@
 #include "edsmfetcher/psysfetcher.h"
 #include "edsmfetcher/psysparser.h"
 #include "logger/slogger.h"
-#include  <algorithm>
 
-const std::string scope("ServerCore");
+const char scope[] = "ServerCore";
 
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -20,7 +19,6 @@ ServerCore::ServerCore(SrvConfig *config) {
     m_eddnClient = nullptr;
     m_msgParser = nullptr;
     m_config = config;
-    m_logger = new SLogger();
 }
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -59,12 +57,12 @@ bool ServerCore::Init() {
 void ServerCore::Start() {
     bool res = m_dbManager->IsSystemsLoaded();
     if (!res) {
-        m_logger->Warning(scope, "It's look like no populated systems in DB. Trying to download list from EDSM.");
-        PSysFetcher pSysFetcher;
+        SLogger::Warning(scope, "It's look like no populated systems in DB. Trying to download list from EDSM.");
+        PSysFetcher pSysFetcher(m_config->GetSPURL());
         pSysFetcher.DownloadingProgress = [this](int32_t current, int32_t length) {
             if (length > 0) {
                 uint32_t progress = ((uint64_t)current * 100L) / length;
-                m_logger->Debug(scope, asprintf("Downloaded %u from %u (%u%%)\n", current, length, progress));
+                SLogger::Debug(scope, asprintf("Downloaded %u from %u (%u%%)\n", current, length, progress));
             }
         };
         uint64_t sysCnt = 0;
@@ -77,15 +75,15 @@ void ServerCore::Start() {
 
         res = pSysFetcher.FetchPopulatedSystems();
         if (!res) {
-            m_logger->Critical(scope, "Downloading of populated systems failed.");
+            SLogger::Critical(scope, "Downloading of populated systems failed.");
             m_canExit = true;
             return;
         }
 
-
-        m_logger->Info(scope, asprintf("Downloading finished. %d systems added", sysCnt));
+        SLogger::Info(scope, asprintf("Downloading finished. %d systems added", sysCnt));
     }
 
+    SLogger::Info(scope, "Starting message handling loop.");
 
     m_msgParser->Start();
     m_eddnClient->Start();
